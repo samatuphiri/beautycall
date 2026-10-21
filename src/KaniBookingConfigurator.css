@@ -1,0 +1,327 @@
+
+.kani-booking-root, .kani-booking-root *{box-sizing:border-box;margin:0;padding:0}
+.kani-booking-root{
+  font-family:'DM Sans',sans-serif;
+  background:#161b2a;
+  color:#e8e4de;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+.kani-booking-root{
+  --navy:#161b2a;
+  --navy-card:#1e2437;
+  --navy-card2:#242b3d;
+  --navy-border:#2c3550;
+  --navy-border2:#353d58;
+  --blush:#c8887a;
+  --blush-light:#d9a898;
+  --blush-dim:#9a6258;
+  --blush-bg:rgba(200,136,122,0.12);
+  --blush-bg2:rgba(200,136,122,0.06);
+  --cream:#e8e4de;
+  --cream-dim:#a8a29c;
+  --cream-faint:#3a4055;
+  --serif:'Cormorant Garamond',serif;
+  --sans:'DM Sans',sans-serif;
+}
+.kani-booking-root .wrap{max-width:640px;margin:0 auto;padding:32px 20px 80px}
+
+/* Header */
+.kani-booking-root .site-header{text-align:center;margin-bottom:40px}
+.kani-booking-root .site-logo{font-family:var(--serif);font-size:22px;font-weight:400;letter-spacing:0.35em;color:var(--cream);margin-bottom:3px}
+.kani-booking-root .site-sub{font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:var(--cream-dim)}
+
+/* Progress */
+.kani-booking-root .progress-wrap{margin-bottom:36px}
+.kani-booking-root .progress-track{height:1px;background:var(--navy-border);border-radius:1px;overflow:hidden;margin-bottom:10px}
+.kani-booking-root .progress-fill{height:100%;background:var(--blush);transition:width 0.5s cubic-bezier(.4,0,0,1)}
+.kani-booking-root .step-dots{display:flex;gap:5px;justify-content:center}
+.kani-booking-root .step-dot{width:5px;height:5px;border-radius:50%;background:var(--navy-border2);transition:all 0.3s}
+.kani-booking-root .step-dot.done{background:var(--blush-dim)}
+.kani-booking-root .step-dot.active{background:var(--blush);width:16px;border-radius:3px}
+
+/* Step label */
+.kani-booking-root .step-eyebrow{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--cream-dim);margin-bottom:10px}
+.kani-booking-root .step-title{font-family:var(--serif);font-size:32px;font-weight:300;color:var(--cream);line-height:1.2;margin-bottom:8px}
+.kani-booking-root .step-sub{font-size:13px;color:var(--cream-dim);line-height:1.6;margin-bottom:28px}
+
+/* Cards */
+.kani-booking-root .card{
+  background:var(--navy-card);
+  border:1px solid var(--navy-border);
+  border-radius:12px;
+  padding:20px;
+  cursor:pointer;
+  transition:all 0.2s;
+  position:relative;
+}
+.kani-booking-root .card:hover{border-color:var(--navy-border2);background:var(--navy-card2)}
+.kani-booking-root .card.selected{border-color:var(--blush);background:var(--navy-card2)}
+.kani-booking-root .card-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.kani-booking-root .card-title{font-family:var(--serif);font-size:17px;font-weight:400;color:var(--cream);margin-bottom:4px}
+.kani-booking-root .card-desc{font-size:12px;color:var(--cream-dim);line-height:1.55}
+.kani-booking-root .card-emoji{font-size:20px;margin-bottom:10px}
+.kani-booking-root .check{
+  position:absolute;top:12px;right:12px;
+  width:18px;height:18px;border-radius:50%;
+  background:var(--blush);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:#fff;
+}
+
+/* Buttons */
+.kani-booking-root .btn-primary{
+  background:var(--blush);
+  color:#fff;
+  border:none;
+  padding:14px 28px;
+  border-radius:100px;
+  font-family:var(--sans);
+  font-size:12px;
+  font-weight:500;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all 0.2s;
+  width:100%;
+}
+.kani-booking-root .btn-primary:hover{background:var(--blush-light);transform:translateY(-1px)}
+.kani-booking-root .btn-primary:disabled{opacity:0.35;cursor:not-allowed;transform:none}
+.kani-booking-root .btn-outline{
+  background:transparent;
+  color:var(--cream);
+  border:1px solid var(--navy-border2);
+  padding:13px 28px;
+  border-radius:100px;
+  font-family:var(--sans);
+  font-size:12px;
+  font-weight:500;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.kani-booking-root .btn-outline:hover{border-color:var(--blush);color:var(--blush)}
+.kani-booking-root .btn-ghost{
+  background:none;border:none;
+  color:var(--cream-dim);
+  font-family:var(--sans);font-size:13px;
+  cursor:pointer;display:flex;align-items:center;gap:6px;
+  transition:color 0.2s;padding:8px 0;letter-spacing:0.02em;
+}
+.kani-booking-root .btn-ghost:hover{color:var(--blush)}
+
+/* Nav row */
+.kani-booking-root .nav-row{display:flex;align-items:center;gap:12px;margin-top:28px}
+
+/* Pills */
+.kani-booking-root .pill{
+  padding:8px 18px;
+  border-radius:100px;
+  border:1px solid var(--navy-border2);
+  font-size:12px;font-family:var(--sans);
+  cursor:pointer;transition:all 0.2s;
+  color:var(--cream-dim);background:transparent;
+  letter-spacing:0.03em;
+}
+.kani-booking-root .pill:hover{border-color:var(--blush);color:var(--cream)}
+.kani-booking-root .pill.active{background:var(--blush-bg);border-color:var(--blush);color:var(--blush)}
+.kani-booking-root .pills-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+
+/* Service carousel */
+.kani-booking-root .svc-scroll{overflow-x:auto;margin-bottom:16px;padding-bottom:6px;-webkit-overflow-scrolling:touch}
+.kani-booking-root .svc-scroll::-webkit-scrollbar{height:2px}
+.kani-booking-root .svc-scroll::-webkit-scrollbar-track{background:var(--navy-border)}
+.kani-booking-root .svc-scroll::-webkit-scrollbar-thumb{background:var(--blush-dim);border-radius:2px}
+.kani-booking-root .svc-row{display:flex;gap:8px;width:max-content}
+.kani-booking-root .svc-chip{
+  padding:10px 16px;border-radius:100px;
+  border:1px solid var(--navy-border);
+  background:var(--navy-card);
+  color:var(--cream-dim);font-size:13px;
+  cursor:pointer;transition:all 0.2s;white-space:nowrap;
+}
+.kani-booking-root .svc-chip:hover{border-color:var(--navy-border2);color:var(--cream)}
+.kani-booking-root .svc-chip.active{border-color:var(--blush);background:var(--blush-bg);color:var(--cream)}
+
+/* Expanded service panel */
+.kani-booking-root .panel{
+  background:var(--navy-card);
+  border:1px solid var(--navy-border);
+  border-radius:14px;
+  padding:22px;
+  margin-bottom:16px;
+}
+.kani-booking-root .panel-title{font-family:var(--serif);font-size:22px;font-weight:300;color:var(--cream);margin-bottom:4px}
+.kani-booking-root .panel-desc{font-size:12px;color:var(--cream-dim);margin-bottom:18px;line-height:1.55}
+.kani-booking-root .field-label{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--cream-dim);display:block;margin-bottom:8px}
+.kani-booking-root .divider{height:1px;background:var(--navy-border);margin:18px 0}
+
+/* Duration buttons */
+.kani-booking-root .dur-row{display:flex;gap:8px;margin-bottom:20px}
+.kani-booking-root .dur-btn{
+  flex:1;padding:10px 6px;
+  border:1px solid var(--navy-border);border-radius:10px;
+  background:transparent;color:var(--cream-dim);
+  font-family:var(--sans);font-size:13px;cursor:pointer;
+  transition:all 0.2s;text-align:center;position:relative;
+}
+.kani-booking-root .dur-btn:hover{border-color:var(--navy-border2);color:var(--cream)}
+.kani-booking-root .dur-btn.active{border-color:var(--blush);background:var(--blush-bg);color:var(--cream)}
+.kani-booking-root .pop-badge{
+  position:absolute;top:-8px;left:50%;transform:translateX(-50%);
+  background:var(--blush);color:#fff;
+  font-size:9px;padding:2px 8px;border-radius:100px;
+  white-space:nowrap;font-weight:500;letter-spacing:0.06em;
+}
+
+/* Price display */
+.kani-booking-root .price-row{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--navy-card2);border-radius:10px;padding:14px 18px;margin-top:4px;
+}
+.kani-booking-root .price-label{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--cream-dim);margin-bottom:3px}
+.kani-booking-root .price-val{font-family:var(--serif);font-size:30px;font-weight:300;color:var(--cream)}
+.kani-booking-root .add-btn{
+  background:var(--blush);color:#fff;border:none;
+  padding:10px 20px;border-radius:100px;
+  font-family:var(--sans);font-size:11px;font-weight:500;
+  letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;
+  transition:all 0.2s;white-space:nowrap;
+}
+.kani-booking-root .add-btn:hover{background:var(--blush-light)}
+.kani-booking-root .add-btn.success{background:#4a7c5f}
+
+/* Cart */
+.kani-booking-root .cart-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;background:var(--navy-card);
+  border:1px solid var(--navy-border);border-radius:10px;margin-bottom:6px;
+}
+.kani-booking-root .cart-name{font-size:14px;color:var(--cream)}
+.kani-booking-root .cart-detail{font-size:11px;color:var(--cream-dim);margin-top:2px}
+.kani-booking-root .cart-price{font-size:14px;color:var(--cream);margin-right:12px}
+.kani-booking-root .rm-btn{background:none;border:none;color:var(--cream-faint);cursor:pointer;font-size:18px;line-height:1;transition:color 0.2s;padding:0}
+.kani-booking-root .rm-btn:hover{color:#c0574a}
+
+/* Calendar */
+.kani-booking-root .cal-wrap{background:var(--navy-card);border:1px solid var(--navy-border);border-radius:14px;padding:20px;margin-bottom:16px}
+.kani-booking-root .cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.kani-booking-root .cal-month{font-family:var(--serif);font-size:18px;font-weight:400;color:var(--cream)}
+.kani-booking-root .cal-nav{background:none;border:1px solid var(--navy-border);border-radius:8px;color:var(--cream-dim);cursor:pointer;padding:5px 11px;font-size:15px;transition:all 0.2s}
+.kani-booking-root .cal-nav:hover{border-color:var(--blush);color:var(--blush)}
+.kani-booking-root .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.kani-booking-root .cal-dh{text-align:center;font-size:10px;letter-spacing:0.08em;color:var(--cream-dim);padding:4px;text-transform:uppercase}
+.kani-booking-root .cal-day{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  border-radius:8px;font-size:13px;cursor:pointer;
+  transition:all 0.2s;color:var(--cream-dim);
+  border:1px solid transparent;
+}
+.kani-booking-root .cal-day:hover:not(.disabled):not(.empty){background:var(--navy-card2);border-color:var(--navy-border2)}
+.kani-booking-root .cal-day.today{color:var(--blush)}
+.kani-booking-root .cal-day.selected{background:var(--blush-bg);border-color:var(--blush);color:var(--cream)}
+.kani-booking-root .cal-day.disabled{color:var(--cream-faint);cursor:not-allowed}
+
+/* Time grid */
+.kani-booking-root .time-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.kani-booking-root .time-slot{
+  padding:11px;border:1px solid var(--navy-border);
+  border-radius:10px;text-align:center;font-size:13px;
+  color:var(--cream-dim);cursor:pointer;transition:all 0.2s;
+}
+.kani-booking-root .time-slot:hover{border-color:var(--navy-border2);color:var(--cream)}
+.kani-booking-root .time-slot.selected{background:var(--blush-bg);border-color:var(--blush);color:var(--cream)}
+.kani-booking-root .time-slot-note{font-size:10px;color:var(--blush-dim);margin-top:2px}
+
+/* After hours */
+.kani-booking-root .ah-notice{
+  background:var(--blush-bg2);border:1px solid rgba(200,136,122,0.2);
+  border-radius:10px;padding:12px 16px;
+  display:flex;gap:10px;font-size:12px;color:var(--blush-light);margin-top:12px;
+}
+
+/* Input */
+.kani-booking-root .input{
+  background:var(--navy-card);border:1px solid var(--navy-border);
+  border-radius:10px;padding:12px 16px;
+  color:var(--cream);font-family:var(--sans);font-size:14px;
+  width:100%;outline:none;transition:border-color 0.2s;
+}
+.kani-booking-root .input:focus{border-color:var(--navy-border2)}
+.kani-booking-root .input::placeholder{color:var(--cream-faint);opacity:1}
+.kani-booking-root textarea.input{resize:vertical;min-height:80px;line-height:1.55}
+.kani-booking-root .field-group{margin-bottom:16px}
+.kani-booking-root select.input{-webkit-appearance:none;appearance:none}
+
+/* Toggle */
+.kani-booking-root .toggle-row{display:flex;gap:8px;margin-bottom:16px}
+.kani-booking-root .toggle-opt{
+  flex:1;padding:12px 8px;border:1px solid var(--navy-border);
+  border-radius:10px;text-align:center;cursor:pointer;
+  transition:all 0.2s;color:var(--cream-dim);
+}
+.kani-booking-root .toggle-opt:hover{border-color:var(--navy-border2)}
+.kani-booking-root .toggle-opt.active{border-color:var(--blush);background:var(--blush-bg);color:var(--cream)}
+.kani-booking-root .toggle-opt-title{font-size:13px;font-weight:500;margin-bottom:2px}
+.kani-booking-root .toggle-opt-sub{font-size:10px;color:var(--cream-dim);letter-spacing:0.04em}
+
+/* Royalty banner */
+.kani-booking-root .luxury-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--blush-bg2);border:1px solid rgba(200,136,122,0.2);
+  border-radius:100px;padding:5px 14px;
+  font-size:11px;color:var(--blush-light);letter-spacing:0.06em;
+  margin-bottom:12px;
+}
+
+/* Stepper */
+.kani-booking-root .stepper{display:flex;align-items:center;gap:14px}
+.kani-booking-root .stp-btn{
+  width:34px;height:34px;border-radius:50%;
+  border:1px solid var(--navy-border);background:var(--navy-card2);
+  color:var(--cream);font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;line-height:1;
+}
+.kani-booking-root .stp-btn:hover{border-color:var(--blush);color:var(--blush)}
+.kani-booking-root .stp-val{font-family:var(--serif);font-size:22px;min-width:28px;text-align:center;color:var(--cream)}
+
+/* Summary */
+.kani-booking-root .summ-section{margin-bottom:20px}
+.kani-booking-root .summ-label{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--cream-dim);margin-bottom:4px}
+.kani-booking-root .summ-val{font-family:var(--serif);font-size:16px;font-weight:300;color:var(--cream)}
+.kani-booking-root .summ-row{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--navy-border)}
+.kani-booking-root .summ-row-name{font-size:14px;color:var(--cream)}
+.kani-booking-root .summ-row-detail{font-size:11px;color:var(--cream-dim);margin-top:2px}
+.kani-booking-root .summ-row-price{font-size:14px;color:var(--cream)}
+.kani-booking-root .summ-total{display:flex;justify-content:space-between;align-items:baseline;padding:16px 0 0}
+.kani-booking-root .summ-total-label{font-family:var(--serif);font-size:18px;font-weight:300;color:var(--cream-dim);letter-spacing:0.04em}
+.kani-booking-root .summ-total-val{font-family:var(--serif);font-size:28px;font-weight:300;color:var(--cream)}
+
+/* WhatsApp button */
+.kani-booking-root .wa-btn{
+  width:100%;padding:16px;border-radius:100px;
+  background:var(--blush);border:none;
+  color:#fff;font-family:var(--sans);font-size:12px;
+  font-weight:500;letter-spacing:0.1em;text-transform:uppercase;
+  cursor:pointer;transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.kani-booking-root .wa-btn:hover{background:var(--blush-light);transform:translateY(-1px)}
+
+/* Participant card */
+.kani-booking-root .p-card{background:var(--navy-card);border:1px solid var(--navy-border);border-radius:12px;padding:16px;margin-bottom:10px}
+.kani-booking-root .p-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.kani-booking-root .p-name{font-family:var(--serif);font-size:16px;color:var(--cream)}
+.kani-booking-root .p-price{font-size:13px;color:var(--blush)}
+
+/* Info box */
+.kani-booking-root .info-box{
+  background:var(--navy-card2);border:1px solid var(--navy-border);
+  border-radius:12px;padding:18px;
+  text-align:center;margin-bottom:16px;
+}
+
+.kani-booking-root .fx{animation:fx 0.3s ease both}
+@keyframes fx{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
