@@ -2,29 +2,30 @@
 .kani-booking-root, .kani-booking-root *{box-sizing:border-box;margin:0;padding:0}
 .kani-booking-root{
   font-family:'DM Sans',sans-serif;
-  background:#161b2a;
-  color:#e8e4de;
-  min-height:100vh;
+  background:transparent;
+  color:#f5ebe8;
+  min-height:0;
+  width:100%;
   -webkit-font-smoothing:antialiased;
 }
 .kani-booking-root{
-  --navy:#161b2a;
-  --navy-card:#1e2437;
-  --navy-card2:#242b3d;
-  --navy-border:#2c3550;
-  --navy-border2:#353d58;
-  --blush:#c8887a;
-  --blush-light:#d9a898;
-  --blush-dim:#9a6258;
-  --blush-bg:rgba(200,136,122,0.12);
-  --blush-bg2:rgba(200,136,122,0.06);
-  --cream:#e8e4de;
-  --cream-dim:#a8a29c;
-  --cream-faint:#3a4055;
+  --navy:#0a1128;
+  --navy-card:rgba(255,255,255,0.035);
+  --navy-card2:rgba(255,255,255,0.06);
+  --navy-border:rgba(245,235,232,0.10);
+  --navy-border2:rgba(245,235,232,0.18);
+  --blush:#d4a5a2;
+  --blush-light:#e8c4c2;
+  --blush-dim:#c18f8c;
+  --blush-bg:rgba(212,165,162,0.12);
+  --blush-bg2:rgba(212,165,162,0.06);
+  --cream:#f5ebe8;
+  --cream-dim:rgba(245,235,232,0.62);
+  --cream-faint:rgba(245,235,232,0.25);
   --serif:'Cormorant Garamond',serif;
   --sans:'DM Sans',sans-serif;
 }
-.kani-booking-root .wrap{max-width:640px;margin:0 auto;padding:32px 20px 80px}
+.kani-booking-root.wrap{max-width:860px;margin:0 auto;padding:24px 24px 64px}
 
 /* Header */
 .kani-booking-root .site-header{text-align:center;margin-bottom:40px}
@@ -236,7 +237,7 @@
 
 /* After hours */
 .kani-booking-root .ah-notice{
-  background:var(--blush-bg2);border:1px solid rgba(200,136,122,0.2);
+  background:var(--blush-bg2);border:1px solid rgba(212,165,162,0.2);
   border-radius:10px;padding:12px 16px;
   display:flex;gap:10px;font-size:12px;color:var(--blush-light);margin-top:12px;
 }
