@@ -162,7 +162,7 @@ export default function KaniLanding() {
       <div style={{ position: "fixed", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: "-20%", left: "-10%", width: 600, height: 600, background: "radial-gradient(circle, rgba(193,143,140,0.12) 0%, transparent 70%)", borderRadius: "50%" }} />
         <div style={{ position: "absolute", bottom: "10%", right: "-10%", width: 500, height: 500, background: "radial-gradient(circle, rgba(237,194,192,0.08) 0%, transparent 70%)", borderRadius: "50%" }} />
-        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 800, height: 400, background: "radial-gradient(ellipse, rgba(10,17,40,0) 0%, rgba(10,17,40,0.8) 100%)" }} />
+
       </div>
 
       {/* NAV */}
