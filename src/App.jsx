@@ -85,7 +85,7 @@ export default function KaniLanding() {
     const dur = durations[selectedDuration];
     const addonList = selectedAddons.map((i) => addons[i]).join(", ") || "None";
     const msg = encodeURIComponent(
-      `Hello Kani!\n\nI'd like to book a session:\n\nAddress: ${address || "[To be confirmed]"}\nCategory: ${["Individual & Couples", "Group & Events", "Corporate Wellness"][activeCategory]}\nService: ${svc}\nDuration: ${dur}\nAdd-ons: ${addonList}\nDate: ${selectedDate} May 2026 at ${TIMES[selectedTime]}\n\nThank you!`
+      `Hello BeautyCall!\n\nI'd like to book a session:\n\nAddress: ${address || "[To be confirmed]"}\nCategory: ${["Individual & Couples", "Group & Events", "Corporate Wellness"][activeCategory]}\nService: ${svc}\nDuration: ${dur}\nAdd-ons: ${addonList}\nDate: ${selectedDate} May 2026 at ${TIMES[selectedTime]}\n\nThank you!`
     );
     window.open(`https://wa.me/27624771887?text=${msg}`, "_blank");
   };
@@ -177,7 +177,7 @@ export default function KaniLanding() {
         transition: "all 0.5s ease",
       }}>
         <div>
-          <div style={{ fontSize: 22, fontWeight: 300, letterSpacing: "0.4em" }}>KANI</div>
+          <div style={{ fontSize: 22, fontWeight: 300, letterSpacing: "0.4em" }}>BeautyCall</div>
           <div className="tag" style={{ fontSize: 9, marginTop: 2 }}>Mobile Massage Therapy</div>
         </div>
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
@@ -210,7 +210,7 @@ export default function KaniLanding() {
             </FadeSection>
             <FadeSection delay={0.15}>
               <p className="sans" style={{ fontSize: 15, color: "rgba(245,235,232,0.6)", lineHeight: 1.8, maxWidth: 420, marginBottom: 40 }}>
-                Kani transforms your home, hotel, or workspace into a private sanctuary. Premium mobile massage therapy — delivered to you throughout Cape Town.
+                BeautyCall transforms your home, hotel, or workspace into a private sanctuary. Premium mobile massage therapy — delivered to you throughout Cape Town.
               </p>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                 <button className="btn-primary" style={{ padding: "14px 32px", borderRadius: 100 }}
@@ -358,7 +358,7 @@ export default function KaniLanding() {
       <footer style={{ padding: "60px 48px", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 32 }}>
           <div>
-            <div style={{ fontSize: 28, fontWeight: 300, letterSpacing: "0.4em", marginBottom: 8 }}>KANI</div>
+            <div style={{ fontSize: 28, fontWeight: 300, letterSpacing: "0.4em", marginBottom: 8 }}>BeautyCall</div>
             <p className="sans" style={{ color: "rgba(245,235,232,0.45)", fontSize: 13, maxWidth: 360, lineHeight: 1.7 }}>
               Luxury mobile massage therapy for recovery, calm, and elevated wellness — throughout Cape Town.
             </p>
