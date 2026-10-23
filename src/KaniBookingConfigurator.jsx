@@ -85,13 +85,13 @@ export default function KaniBookingConfigurator(){
       const adds=it.addons.map(a=>ADDONS[a]?.name).filter(Boolean);
       return`  - ${it.label?it.label+' — ':''}${SERVICES[it.serviceId]?.name} (${it.duration}min)${adds.length?' + '+adds.join(', '):''}  R${it.price}`;
     }).join('\n');
-    const msg=`New Booking Request – Kani\n\nIntent: ${INTENTS.find(i=>i.id===intent)?.label}\nCategory: ${CATEGORIES.find(c=>c.id===cat)?.label}\nDate: ${fmtDate(date)}\nTime: ${time}\nAddress: ${addr.street}, ${addr.suburb}\n\nServices:\n${lines}\n\nTherapists Required: ${therapists}\nBase Total: R${baseTotal}\nAfter-Hours Fee: R${ahFee}\nFinal Investment: R${final}\n\nNotes: ${addr.notes||'None'}`;
+    const msg=`New Booking Request – BeautyCall\n\nIntent: ${INTENTS.find(i=>i.id===intent)?.label}\nCategory: ${CATEGORIES.find(c=>c.id===cat)?.label}\nDate: ${fmtDate(date)}\nTime: ${time}\nAddress: ${addr.street}, ${addr.suburb}\n\nServices:\n${lines}\n\nTherapists Required: ${therapists}\nBase Total: R${baseTotal}\nAfter-Hours Fee: R${ahFee}\nFinal Investment: R${final}\n\nNotes: ${addr.notes||'None'}`;
     window.open(`https://wa.me/27624771887?text=${encodeURIComponent(msg)}`,'_blank');
   }
 
   return React.createElement('div',{className:'kani-booking-root wrap'},
     React.createElement('div',{className:'site-header'},
-      React.createElement('div',{className:'site-logo'},'KANI'),
+      React.createElement('div',{className:'site-logo'},'BeautyCall'),
       React.createElement('div',{className:'site-sub'},'Mobile Massage Therapy')
     ),
     React.createElement('div',{className:'progress-wrap'},
@@ -112,7 +112,7 @@ export default function KaniBookingConfigurator(){
 function S1Intent({intent,setIntent,onNext}){
   return React.createElement('div',{className:'fx'},
     React.createElement('div',{className:'step-eyebrow'},'Step 01'),
-    React.createElement('div',{className:'step-title'},'What brings you to Kani?'),
+    React.createElement('div',{className:'step-title'},'What brings you to BeautyCall?'),
     React.createElement('div',{className:'step-sub'},'Set the intention for your experience'),
     React.createElement('div',{className:'card-grid-2'},
       INTENTS.map(i=>React.createElement('div',{key:i.id,className:`card${intent===i.id?' selected':''}`,onClick:()=>setIntent(i.id)},
