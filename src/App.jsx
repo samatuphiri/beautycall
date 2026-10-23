@@ -240,7 +240,7 @@ export default function KaniLanding() {
               <div style={{ position: "absolute", inset: -24, background: "radial-gradient(ellipse, rgba(212,165,162,0.2) 0%, transparent 70%)", borderRadius: "50%" }} />
               <div style={{ borderRadius: 40, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)", position: "relative" }}>
                 <img
-                  src="https://i.imgur.com/Qpp47PU.jpeg"
+                  src="https://i.imgur.com/CGLTYap.jpeg"
                   alt="Luxury massage"
                   style={{ width: "100%", height: 640, objectFit: "cover", display: "block", transition: "transform 0.8s ease" }}
                   onMouseEnter={e => e.target.style.transform = "scale(1.04)"}
