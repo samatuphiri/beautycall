@@ -185,10 +185,6 @@ export default function KaniLanding() {
             onMouseEnter={e => e.target.style.color = "#f5ebe8"} onMouseLeave={e => e.target.style.color = "rgba(245,235,232,0.5)"}>
             Services
           </a>
-          <a href="#booking" className="sans hide-mobile" style={{ color: "rgba(245,235,232,0.5)", fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none", transition: "color 0.3s", marginRight: 12 }}
-            onMouseEnter={e => e.target.style.color = "#f5ebe8"} onMouseLeave={e => e.target.style.color = "rgba(245,235,232,0.5)"}>
-            Book
-          </a>
           <button className="btn-primary" style={{ padding: "10px 24px", borderRadius: 100 }}
             onClick={() => document.getElementById("booking").scrollIntoView({ behavior: "smooth" })}>
             Reserve
