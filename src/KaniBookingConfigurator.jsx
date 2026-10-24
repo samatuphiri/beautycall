@@ -67,7 +67,7 @@ export default function KaniBookingConfigurator(){
   const[items,setItems]=useState([]);
   const[date,setDate]=useState(null);
   const[time,setTime]=useState(null);
-  const[addr,setAddr]=useState({street:'',suburb:'',notes:''});
+  const[addr,setAddr]=useState({name:'',street:'',suburb:'',notes:'',additionalNotes:''});
   const[group,setGroup]=useState({adults:2,children:0,eventType:''});
   const[corp,setCorp]=useState({company:'',contact:'',attendees:2,eventType:'',location:''});
   const N=8;
@@ -86,7 +86,8 @@ export default function KaniBookingConfigurator(){
       const adds=it.addons.map(a=>ADDONS[a]?.name).filter(Boolean);
       return`  - ${it.label?it.label+' — ':''}${SERVICES[it.serviceId]?.name} (${it.duration}min)${adds.length?' + '+adds.join(', '):''}  R${it.price}`;
     }).join('\n');
-    const msg=`New Booking Request – BeautyCall\n\nIntent: ${INTENTS.find(i=>i.id===intent)?.label}\nCategory: ${CATEGORIES.find(c=>c.id===cat)?.label}\nDate: ${fmtDate(date)}\nTime: ${time}\nAddress: ${addr.street}, ${addr.suburb}\n\nServices:\n${lines}\n\nTherapists Required: ${therapists}\nBase Total: R${baseTotal}\nAfter-Hours Fee: R${ahFee}\nFinal Investment: R${final}\n\nNotes: ${addr.notes||'None'}`;
+    const corpDetails=cat==='corporate'?`\nCompany: ${corp.company}\nCorporate Contact: ${corp.contact}\nAttendees: ${corp.attendees}\nEvent: ${corp.eventType||'Not specified'}\nCorporate Location: ${corp.location||'Not specified'}`:'';
+    const msg=`New Booking Request – BeautyCall\n\nCustomer: ${addr.name}\nIntent: ${INTENTS.find(i=>i.id===intent)?.label}\nCategory: ${CATEGORIES.find(c=>c.id===cat)?.label}${corpDetails}\nDate: ${fmtDate(date)}\nTime: ${time}\nService Address: ${addr.street}, ${addr.suburb}\n\nServices:\n${lines}\n\nTherapists Required: ${therapists}\nBase Total: R${baseTotal}\nAfter-Hours Fee: R${ahFee}\nFinal Investment: R${final}\n\nAccess Notes: ${addr.notes||'None'}\nAdditional Notes: ${addr.additionalNotes||'None'}`;
     window.open(`https://wa.me/27624771887?text=${encodeURIComponent(msg)}`,'_blank');
   }
 
@@ -448,26 +449,33 @@ function S6Address({addr,setAddr,onNext,onBack}){
   return React.createElement('div',{className:'fx'},
     React.createElement('div',{className:'step-eyebrow'},'Step 06'),
     React.createElement('div',{className:'step-title'},'Where shall we come to you?'),
-    React.createElement('div',{className:'step-sub'},'Your therapist will arrive at your door'),
+    React.createElement('div',{className:'step-sub'},'Share your contact and service location'),
+    React.createElement('div',{className:'field-group'},
+      React.createElement('label',{className:'field-label'},'Full Name'),
+      React.createElement('input',{className:'input',autoComplete:'name',placeholder:'Your full name',value:addr.name,onChange:set('name')})
+    ),
     React.createElement('div',{className:'field-group'},
       React.createElement('label',{className:'field-label'},'Street Address'),
-      React.createElement('input',{className:'input',placeholder:'12 Luxury Lane',value:addr.street,onChange:set('street')})
+      React.createElement('input',{className:'input',autoComplete:'street-address',placeholder:'12 Luxury Lane',value:addr.street,onChange:set('street')})
     ),
     React.createElement('div',{className:'field-group'},
       React.createElement('label',{className:'field-label'},'Suburb'),
-      React.createElement('input',{className:'input',placeholder:'Camps Bay',value:addr.suburb,onChange:set('suburb')})
+      React.createElement('input',{className:'input',autoComplete:'address-level2',placeholder:'Camps Bay',value:addr.suburb,onChange:set('suburb')})
     ),
     React.createElement('div',{className:'field-group'},
-      React.createElement('label',{className:'field-label'},'Access Notes'),
+      React.createElement('label',{className:'field-label'},'Access Notes (optional)'),
       React.createElement('textarea',{className:'input',placeholder:'Gate code, parking, estate access, buzzer…',value:addr.notes,onChange:set('notes')})
+    ),
+    React.createElement('div',{className:'field-group'},
+      React.createElement('label',{className:'field-label'},'Additional Notes (optional)'),
+      React.createElement('textarea',{className:'input',placeholder:'Anything else we should know about your booking or preferences?',value:addr.additionalNotes,onChange:set('additionalNotes')})
     ),
     React.createElement('div',{className:'nav-row'},
       React.createElement('button',{className:'btn-ghost',onClick:onBack},'← Back'),
-      React.createElement('button',{className:'btn-primary',disabled:!addr.street||!addr.suburb,onClick:onNext,style:{flex:1}},'Review Booking')
+      React.createElement('button',{className:'btn-primary',disabled:!addr.name.trim()||!addr.street.trim()||!addr.suburb.trim(),onClick:onNext,style:{flex:1}},'Review Booking')
     )
   );
 }
-
 function S7Summary({intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,onNext,onBack}){
   const isCorp=cat==='corporate';
   const therapists=items.reduce((s,it)=>s+(it.therapistCount||1),0);
@@ -482,9 +490,12 @@ function S7Summary({intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,o
         )
       ),
       React.createElement('div',{style:{marginBottom:20}},
-        React.createElement('div',{className:'summ-label'},'Address'),
+        React.createElement('div',{className:'summ-label'},'Booking Contact'),
+        React.createElement('div',{className:'summ-val'},addr.name),
+        React.createElement('div',{className:'summ-label',style:{marginTop:12}},'Service Address'),
         React.createElement('div',{className:'summ-val'},addr.street+', '+addr.suburb),
-        addr.notes&&React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',marginTop:4}},addr.notes)
+        addr.notes&&React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',marginTop:4}},'Access: '+addr.notes),
+        addr.additionalNotes&&React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',marginTop:4}},'Additional notes: '+addr.additionalNotes)
       ),
       React.createElement('div',{style:{height:1,background:'var(--navy-border)',margin:'0 0 16px'}}),
       React.createElement('div',{className:'summ-label',style:{marginBottom:8}},'Services'),
