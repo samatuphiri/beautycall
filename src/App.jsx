@@ -101,7 +101,11 @@ export default function KaniLanding() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; scroll-padding-top: 88px; }
         body { background: #0a1128; }
+        @media (prefers-reduced-motion: reduce) {
+          html { scroll-behavior: auto; }
+        }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #0a1128; }
         ::-webkit-scrollbar-thumb { background: #d4a5a2; border-radius: 2px; }
@@ -186,7 +190,7 @@ export default function KaniLanding() {
             Services
           </a>
           <button className="btn-primary" style={{ padding: "10px 24px", borderRadius: 100 }}
-            onClick={() => document.getElementById("booking").scrollIntoView({ behavior: "smooth" })}>
+            onClick={() => document.getElementById("booking").scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" })}>
             Reserve
           </button>
         </div>
@@ -210,11 +214,11 @@ export default function KaniLanding() {
               </p>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                 <button className="btn-primary" style={{ padding: "14px 32px", borderRadius: 100 }}
-                  onClick={() => document.getElementById("booking").scrollIntoView({ behavior: "smooth" })}>
+                  onClick={() => document.getElementById("booking").scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" })}>
                   Book Your Experience
                 </button>
                 <button className="btn-ghost" style={{ padding: "14px 32px", borderRadius: 100 }}
-                  onClick={() => document.getElementById("services").scrollIntoView({ behavior: "smooth" })}>
+                  onClick={() => document.getElementById("services").scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" })}>
                   Explore Services
                 </button>
               </div>
@@ -259,12 +263,12 @@ export default function KaniLanding() {
       </section>
 
       {/* BOOKING CONFIGURATOR — integrated from the standalone booking app */}
-      <section id="booking" style={{ padding: "48px 0 80px", position: "relative", zIndex: 1 }}>
+      <section id="booking" style={{ padding: "48px 0 80px", position: "relative", zIndex: 1, scrollMarginTop: 88 }}>
         <KaniBookingConfigurator />
       </section>
 
       {/* SERVICES */}
-      <section id="services" style={{ padding: "80px 48px 100px" }}>
+      <section id="services" style={{ padding: "80px 48px 100px", scrollMarginTop: 88 }}>
         <div style={{ maxWidth: 1280, margin: "0 auto" }}>
           <FadeSection>
             <div style={{ textAlign: "center", marginBottom: 64 }}>
@@ -361,7 +365,7 @@ export default function KaniLanding() {
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 14 }}>
             <button className="btn-primary" style={{ padding: "12px 28px", borderRadius: 100 }}
-              onClick={() => document.getElementById("booking").scrollIntoView({ behavior: "smooth" })}>
+              onClick={() => document.getElementById("booking").scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" })}>
               Book Your Experience
             </button>
             <div className="sans" style={{ color: "rgba(245,235,232,0.4)", fontSize: 12 }}>WhatsApp: +27 62 477 1887</div>
