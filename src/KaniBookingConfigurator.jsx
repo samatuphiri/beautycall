@@ -117,7 +117,7 @@ function S1Intent({intent,setIntent,onNext}){
     React.createElement('div',{className:'card-grid-2'},
       INTENTS.map(i=>React.createElement('div',{key:i.id,className:`card${intent===i.id?' selected':''}`,onClick:()=>setIntent(i.id)},
         React.createElement('div',{className:'card-title'},i.label),
-        React.createElement('div',{className:'card-desc'},i.desc),
+
         intent===i.id&&React.createElement('div',{className:'check'},'✓')
       ))
     ),
