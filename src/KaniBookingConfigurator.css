@@ -129,12 +129,17 @@
 .kani-booking-root .pill.active{background:var(--blush-bg);border-color:var(--blush);color:var(--blush)}
 .kani-booking-root .pills-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
 
-/* Service carousel */
-.kani-booking-root .svc-scroll{overflow-x:auto;margin-bottom:16px;padding-bottom:6px;-webkit-overflow-scrolling:touch}
-.kani-booking-root .svc-scroll::-webkit-scrollbar{height:2px}
-.kani-booking-root .svc-scroll::-webkit-scrollbar-track{background:var(--navy-border)}
-.kani-booking-root .svc-scroll::-webkit-scrollbar-thumb{background:var(--blush-dim);border-radius:2px}
+/* Service carousel: touch, mouse and keyboard accessible */
+.kani-booking-root .svc-carousel{display:flex;align-items:center;gap:8px;margin-bottom:16px;min-width:0}
+.kani-booking-root .svc-scroll{overflow-x:auto;flex:1;min-width:0;padding:8px 2px 10px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.kani-booking-root .svc-scroll::-webkit-scrollbar{height:5px}
+.kani-booking-root .svc-scroll::-webkit-scrollbar-track{background:var(--navy-border);border-radius:3px}
+.kani-booking-root .svc-scroll::-webkit-scrollbar-thumb{background:var(--blush-dim);border-radius:3px}
+.kani-booking-root .svc-scroll:focus-visible{outline:2px solid var(--blush);outline-offset:2px}
 .kani-booking-root .svc-row{display:flex;gap:8px;width:max-content}
+.kani-booking-root .svc-nav{flex:0 0 34px;width:34px;height:34px;border:1px solid var(--navy-border2);border-radius:50%;background:rgba(255,255,255,.04);color:var(--cream);font-size:24px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,border-color .2s}
+.kani-booking-root .svc-nav:hover{background:var(--blush-bg);border-color:var(--blush);color:var(--cream)}
+.kani-booking-root .svc-nav:focus-visible,.kani-booking-root .svc-chip:focus-visible{outline:2px solid var(--blush);outline-offset:3px}
 .kani-booking-root .svc-chip{
   padding:10px 16px;border-radius:100px;
   border:1px solid var(--navy-border);
