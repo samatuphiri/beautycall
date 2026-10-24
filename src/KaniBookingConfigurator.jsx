@@ -189,10 +189,14 @@ function IndivBuilder({items,addItem,rmItem,onNext,onBack}){
     React.createElement('div',{className:'step-eyebrow'},'Step 03'),
     React.createElement('div',{className:'step-title'},'Build your experience'),
     React.createElement('div',{className:'step-sub'},'Select services, duration and enhancements'),
-    React.createElement('div',{className:'svc-scroll'},
-      React.createElement('div',{className:'svc-row'},
-        Object.values(SERVICES).map(s=>React.createElement('div',{key:s.id,className:`svc-chip${sel===s.id?' active':''}`,onClick:()=>selectSvc(s.id)},s.name))
-      )
+    React.createElement('div',{className:'svc-carousel'},
+      React.createElement('button',{type:'button',className:'svc-nav svc-nav-prev','aria-label':'Scroll services left',onClick:()=>document.getElementById('kani-service-scroll')?.scrollBy({left:-240,behavior:'smooth'})},'‹'),
+      React.createElement('div',{className:'svc-scroll',id:'kani-service-scroll',tabIndex:0,'aria-label':'Available massage services',role:'region'},
+        React.createElement('div',{className:'svc-row'},
+          Object.values(SERVICES).map(s=>React.createElement('button',{type:'button',key:s.id,className:`svc-chip${sel===s.id?' active':''}`,onClick:()=>selectSvc(s.id)},s.name))
+        )
+      ),
+      React.createElement('button',{type:'button',className:'svc-nav svc-nav-next','aria-label':'Scroll services right',onClick:()=>document.getElementById('kani-service-scroll')?.scrollBy({left:240,behavior:'smooth'})},'›')
     ),
     React.createElement('div',{className:'panel'},
       sel==='royalty'&&React.createElement('div',{className:'luxury-tag'},'✦ 4-Handed Signature Experience'),
