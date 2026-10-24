@@ -2,28 +2,29 @@ import React, { useState, useMemo } from 'react';
 import './KaniBookingConfigurator.css';
 
 const SERVICES={
-  deepTissue:{id:'deepTissue',name:'Deep Tissue',description:'Targeted pressure for chronic tension.',durations:{60:850,90:1200,120:1550}},
-  swedish:{id:'swedish',name:'Swedish',description:'Gentle flowing strokes for relaxation.',durations:{60:800,90:1100,120:1450}},
-  aromatherapy:{id:'aromatherapy',name:'Aromatherapy',description:'Essential oils with therapeutic touch.',durations:{60:900,90:1250,120:1650}},
-  mld:{id:'mld',name:'Lymphatic Drainage',description:'Gentle technique to stimulate lymphatic flow.',durations:{60:950,90:1350,120:1750}},
-  thai:{id:'thai',name:'Thai',description:'Ancient stretching and pressure techniques.',durations:{60:900,90:1300,120:1700}},
-  hotColdStone:{id:'hotColdStone',name:'Hot/Cold Stone',description:'Heated or cooled stones for deep relief.',durations:{60:1000,90:1450,120:1900}},
-  prePostNatal:{id:'prePostNatal',name:'Pre/Post Natal',description:'Safe nurturing massage for mothers.',durations:{60:850,90:1200,120:1550}},
-  reflexology:{id:'reflexology',name:'Reflexology',description:'Pressure point therapy on the feet.',durations:{60:700,90:950,120:1250}},
-  geriatric:{id:'geriatric',name:'Geriatric',description:'Gentle adapted techniques for seniors.',durations:{60:800,90:1100,120:1450}},
-  bns:{id:'bns',name:'Back, Neck & Shoulders',description:'Focused upper body tension relief.',durations:{30:450,45:600,60:750}},
-  legWork:{id:'legWork',name:'Leg Work',description:'Targeted lower body treatment.',durations:{30:450,45:600,60:750}},
-  sports:{id:'sports',name:'Sports Massage',description:'Performance-focused muscle treatment.',durations:{60:900,90:1300,120:1700}},
-  couples:{id:'couples',name:'Couples Massage',description:'Shared relaxation, side by side.',durations:{60:1700,90:2400,120:3100}},
-  royalty:{id:'royalty',name:'Royalty Massage',description:'Four-handed signature luxury experience.',durations:{60:2200,90:3200,120:4200}},
+  swedish:{id:'swedish',name:'Swedish',description:'Gentle flowing strokes for relaxation.',durations:{60:750,90:950,120:1150}},
+  deepTissue:{id:'deepTissue',name:'Deep Tissue',description:'Targeted pressure for chronic tension.',durations:{60:950,90:1250,120:1550}},
+  sports:{id:'sports',name:'Sports Massage',description:'Performance-focused muscle treatment.',durations:{60:1000,90:1300,120:1600}},
+  hotColdStone:{id:'hotColdStone',name:'Hot Stone',description:'A soothing heated-stone experience.',durations:{60:900,90:1200,120:1450}},
+  thai:{id:'thai',name:'Thai',description:'Stretching and pressure techniques.',durations:{60:800,90:1000,120:1250}},
+  aromatherapy:{id:'aromatherapy',name:'Aromatherapy',description:'Essential oils with therapeutic touch.',durations:{60:850,90:1100,120:1350}},
+  prePostNatal:{id:'prePostNatal',name:'Prenatal Massage',description:'Nurturing massage tailored for pregnancy.',durations:{60:950}},
+  mld:{id:'mld',name:'Manual Lymphatic Drainage',description:'Gentle technique to support lymphatic flow.',durations:{60:950,90:1250,120:1550}},
+  reflexology:{id:'reflexology',name:'Reflexology',description:'Pressure-point therapy focused on the feet.',durations:{30:550,45:700}},
+  bns:{id:'bns',name:'Back, Neck & Shoulders',description:'Focused upper-body tension relief.',durations:{45:700}},
+  legWork:{id:'legWork',name:'Leg Work',description:'Targeted lower-body treatment.',durations:{45:700,60:800}},
+  geriatric:{id:'geriatric',name:'Geriatric Massage',description:'Gentle massage adapted for older adults.',durations:{60:750}},
+  couples:{id:'couples',name:'Couples Massage',description:'A shared massage experience.',durations:{60:1400,90:1800,120:2200},simultaneousDurations:{60:1900,90:2300,120:2700}},
+  royalty:{id:'royalty',name:'Royalty Massage',description:'Four-handed signature luxury experience.',durations:{60:2000,90:2900,120:3700}},
 };
 
 const ADDONS={
-  facialMassage:{id:'facialMassage',name:'Facial Massage',price:220},
-  headMassage:{id:'headMassage',name:'Head Massage',price:180},
+  facialMassage:{id:'facialMassage',name:'Facial Massage',price:150},
+  headMassage:{id:'headMassage',name:'Head Massage',price:150},
+  facialHeadMassage:{id:'facialHeadMassage',name:'Facial + Head Massage',price:250},
   bodyExfoliation:{id:'bodyExfoliation',name:'Body Exfoliation',price:350},
-  bodyWrap:{id:'bodyWrap',name:'Body Wrap + Exfoliation',price:550},
-  footSoak:{id:'footSoak',name:'Foot Soak & Scrub',price:250},
+  bodyWrap:{id:'bodyWrap',name:'Body Wrap + Exfoliation',price:450},
+  footSoak:{id:'footSoak',name:'Foot Soak & Scrub',price:300},
 };
 
 const SURCHARGES={afterHoursStart:21,feePerHour:150};
@@ -54,7 +55,7 @@ function calcAH(time,mins){
 }
 function calcPrice(sid,dur,addons,simul){
   const s=SERVICES[sid];if(!s)return 0;
-  let base=(s.durations[dur]||0)*(sid==='royalty'||simul?2:1);
+  const base=sid==='couples'&&simul?(s.simultaneousDurations?.[dur]||s.durations[dur]||0):(s.durations[dur]||0);
   return base+addons.reduce((t,a)=>t+(ADDONS[a]?.price||0),0);
 }
 function fmtDate(d){if(!d)return'';return`${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`}
@@ -168,7 +169,14 @@ function IndivBuilder({items,addItem,rmItem,onNext,onBack}){
     if(!keys.includes(dur))setDur(keys[1]||keys[0]);
     setAddons([]);
   }
-  function toggleAddon(id){setAddons(p=>p.includes(id)?p.filter(a=>a!==id):[...p,id])}
+  function toggleAddon(id){
+    const faceHead=['facialMassage','headMassage','facialHeadMassage'];
+    setAddons(p=>{
+      if(p.includes(id))return p.filter(a=>a!==id);
+      const remaining=faceHead.includes(id)?p.filter(a=>!faceHead.includes(a)):p;
+      return [...remaining,id];
+    });
+  }
   function handleAdd(){
     const isR=sel==='royalty',isC=sel==='couples';
     const tc=isR?2:(isC?(simul?2:1):1);
@@ -259,7 +267,13 @@ function GroupBuilder({group,setGroup,addItem,items,onNext,onBack}){
   const getSvc=k=>pSvc[k]||'swedish';
   const getDur=k=>{const keys=Object.keys(SERVICES[getSvc(k)].durations).map(Number);const d=pDur[k];return d&&keys.includes(d)?d:keys[1]||keys[0]};
   const getAdd=k=>pAdd[k]||[];
-  const toggleA=(k,id)=>setPAdd(p=>({...p,[k]:(p[k]||[]).includes(id)?(p[k]||[]).filter(a=>a!==id):[...(p[k]||[]),id]}));
+  const toggleA=(k,id)=>setPAdd(p=>{
+    const current=p[k]||[];
+    if(current.includes(id))return {...p,[k]:current.filter(a=>a!==id)};
+    const faceHead=['facialMassage','headMassage','facialHeadMassage'];
+    const remaining=faceHead.includes(id)?current.filter(a=>!faceHead.includes(a)):current;
+    return {...p,[k]:[...remaining,id]};
+  });
   const groupTotal=parts.reduce((s,p)=>s+calcPrice(getSvc(p.key),getDur(p.key),getAdd(p.key),false),0);
   function confirm(){
     parts.forEach(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);addItem({serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:1,label:`${p.type} ${p.num}`,id:uuid()})});
