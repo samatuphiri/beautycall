@@ -3,10 +3,9 @@ import KaniBookingConfigurator from "./KaniBookingConfigurator.jsx";
 
 const services = {
   individual: [
-    "Deep Tissue", "Swedish", "Aromatherapy", "Manual Lymphatic Drainage",
+    "Royalty Massage", "Couples Massage", "Deep Tissue", "Swedish", "Aromatherapy", "Manual Lymphatic Drainage",
     "Thai", "Hot/Cold Stone", "Pre/Post Natal", "Reflexology",
-    "Geriatric", "Back, Neck & Shoulders", "Leg Work", "Sports Massage",
-    "Royalty Massage", "Couples Massage"
+    "Geriatric", "Back, Neck & Shoulders", "Leg Work", "Sports Massage"
   ],
   group: [
     "Family Wellness Experience", "Kids Massage", "Group Relaxation Sessions"
