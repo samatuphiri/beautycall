@@ -79,9 +79,7 @@ export default function KaniBookingConfigurator(){
   const final=baseTotal+ahFee;
   const next=()=>setStep(s=>Math.min(s+1,N-1));
   const back=()=>setStep(s=>Math.max(s-1,0));
-  const addItem=it=>setItems(p=>[...p,{...it,id:uuid()}]);
   const selectCategory=id=>{setCat(id);setItems([])};
-  const rmItem=id=>setItems(p=>p.filter(x=>x.id!==id));
 
   function sendWA(){
     const therapists=items.reduce((max,it)=>Math.max(max,it.therapistCount||1),0);
@@ -108,7 +106,7 @@ export default function KaniBookingConfigurator(){
     ),
     step===0&&React.createElement(S1Intent,{intent,setIntent,onNext:next}),
     step===1&&React.createElement(S2Category,{cat,setCat:selectCategory,onNext:next,onBack:back}),
-    step===2&&React.createElement(S3Builder,{cat,items,addItem,rmItem,setItems,group,setGroup,corp,setCorp,event,setEvent,onNext:next,onBack:back}),
+    step===2&&React.createElement(S3Builder,{cat,items,setItems,group,setGroup,corp,setCorp,event,setEvent,onNext:next,onBack:back}),
     step===3&&React.createElement(S4Date,{date,setDate,onNext:next,onBack:back}),
     step===4&&React.createElement(S5Time,{time,setTime,items,onNext:next,onBack:back}),
     step===5&&React.createElement(S6Address,{addr,setAddr,onNext:next,onBack:back}),
@@ -158,13 +156,13 @@ function S2Category({cat,setCat,onNext,onBack}){
   );
 }
 
-function S3Builder({cat,items,addItem,rmItem,setItems,group,setGroup,corp,setCorp,event,setEvent,onNext,onBack}){
+function S3Builder({cat,items,setItems,group,setGroup,corp,setCorp,event,setEvent,onNext,onBack}){
   if(cat==='corporate')return React.createElement(CorpBuilder,{corp,setCorp,onNext,onBack});
   if(cat==='events')return React.createElement(EventBuilder,{event,setEvent,onNext,onBack});
-  return React.createElement(GuestBuilder,{mode:cat==='group'?'group':'individual',group,setGroup,addItem,setItems,items,onNext,onBack});
+  return React.createElement(GuestBuilder,{mode:cat==='group'?'group':'individual',group,setGroup,setItems,items,onNext,onBack});
 }
 
-function GuestBuilder({mode,group,setGroup,addItem,setItems,items,onNext,onBack}){
+function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
   const isGroup=mode==='group';
   const[guestCount,setGuestCount]=useState(1);
   const[pSvc,setPSvc]=useState({});
