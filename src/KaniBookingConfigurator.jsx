@@ -73,7 +73,7 @@ export default function KaniBookingConfigurator(){
   const[corp,setCorp]=useState({company:'',contact:'',attendees:2,eventType:'',location:''});
   const[event,setEvent]=useState({contact:'',attendees:3,eventType:'',location:'',notes:''});
   const N=8;
-  const totalMins=useMemo(()=>items.reduce((s,it)=>s+(parseInt(it.duration)||60),0),[items]);
+  const totalMins=useMemo(()=>items.reduce((s,it)=>s+((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1)),0),[items]);
   const baseTotal=useMemo(()=>items.reduce((s,it)=>s+it.price,0),[items]);
   const ahFee=useMemo(()=>time?calcAH(time,totalMins):0,[time,totalMins]);
   const final=baseTotal+ahFee;
@@ -291,7 +291,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
   }
   function confirm(){
     if(count<1||count>8||(isGroup&&count<3))return;
-    if(!isGroup&&couplesPackage){
+    if(!isGroup&&guestCount===2&&couplesPackage){
       setItems([{id:uuid(),serviceId:'couples',duration:couplesDuration,addons:[],price:calcPrice('couples',couplesDuration,[],couplesTherapists===2),therapistCount:couplesTherapists,label:'Couples Massage — '+(couplesTherapists===2?'simultaneous':'sequential')}]);
     }else{
       setItems(parts.map(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);return {id:uuid(),serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:sid==='royalty'?2:1,label:p.type+' '+p.num}}));
@@ -331,7 +331,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
       !isGroup&&React.createElement('div',{className:'field-group'},
         React.createElement('span',{className:'field-label'},'Number of guests'),
         React.createElement('div',{className:'toggle-row'},
-          React.createElement('button',{type:'button',className:'toggle-opt'+(guestCount===1?' active':''),onClick:()=>{setGuestCount(1);setConfirmed(false)}},'One guest'),
+          React.createElement('button',{type:'button',className:'toggle-opt'+(guestCount===1?' active':''),onClick:()=>{setGuestCount(1);setCouplesPackage(false);setConfirmed(false)}},'One guest'),
           React.createElement('button',{type:'button',className:'toggle-opt'+(guestCount===2?' active':''),onClick:()=>{setGuestCount(2);setConfirmed(false)}},'Two guests')
         )
       ),
