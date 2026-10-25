@@ -331,3 +331,20 @@
 
 .kani-booking-root .fx{animation:fx 0.3s ease both}
 @keyframes fx{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+
+/* Optional direct enquiry for visitors who prefer a personal conversation */
+.kani-booking-root .concierge-link-wrap{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  margin-top:18px;text-align:center;
+}
+.kani-booking-root .concierge-prompt{
+  color:var(--cream-dim);font-size:12px;line-height:1.5;
+}
+.kani-booking-root .concierge-link{
+  color:var(--blush);font-size:12px;line-height:1.6;
+  text-decoration:underline;text-decoration-color:rgba(212,165,162,.45);
+  text-underline-offset:4px;transition:color .2s;
+}
+.kani-booking-root .concierge-link:hover{color:var(--blush-light)}
+.kani-booking-root .concierge-link:focus-visible{outline:2px solid var(--blush);outline-offset:4px;border-radius:2px}
