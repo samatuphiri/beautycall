@@ -123,7 +123,11 @@ function S1Intent({intent,setIntent,onNext}){
         intent===i.id&&React.createElement('div',{className:'check'},'✓')
       ))
     ),
-    React.createElement('button',{className:'btn-primary',disabled:!intent,onClick:onNext},'Continue')
+    React.createElement('button',{className:'btn-primary',disabled:!intent,onClick:onNext},'Continue'),
+    React.createElement('div',{className:'concierge-link-wrap'},
+      React.createElement('span',{className:'concierge-prompt'},'Prefer a personal touch?'),
+      React.createElement('a',{className:'concierge-link',href:'https://wa.me/27624771887?text=Hi%20BeautyCall%2C%20I%27d%20like%20to%20enquire%20about%20a%20massage.',target:'_blank',rel:'noopener noreferrer'},'Connect with our concierge via WhatsApp')
+    )
   );
 }
 
