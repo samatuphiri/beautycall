@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import './KaniBookingConfigurator.css';
 
 const SERVICES={
@@ -112,6 +112,101 @@ export default function KaniBookingConfigurator(){
     step===5&&React.createElement(S6Address,{addr,setAddr,onNext:next,onBack:back}),
     step===6&&React.createElement(S7Summary,{intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,event,onNext:next,onBack:back}),
     step===7&&React.createElement(S8Checkout,{sendWA,onBack:back,final,cat})
+  );
+}
+
+
+function CustomSelect({value,options,onChange,className='',ariaLabel='Choose an option'}){
+  const[open,setOpen]=useState(false);
+  const[activeIndex,setActiveIndex]=useState(Math.max(0,options.findIndex(option=>option.value===value)));
+  const rootRef=useRef(null);
+  const triggerRef=useRef(null);
+  const optionRefs=useRef([]);
+  const selectedIndex=Math.max(0,options.findIndex(option=>option.value===value));
+  const selected=options.find(option=>option.value===value)||options[0];
+
+  useEffect(()=>{
+    if(!open)return;
+    const closeOnOutside=e=>{if(rootRef.current&&!rootRef.current.contains(e.target))setOpen(false)};
+    const closeOnEscape=e=>{if(e.key==='Escape'){setOpen(false);triggerRef.current?.focus()}};
+    document.addEventListener('pointerdown',closeOnOutside);
+    document.addEventListener('keydown',closeOnEscape);
+    optionRefs.current[activeIndex]?.focus();
+    return()=>{
+      document.removeEventListener('pointerdown',closeOnOutside);
+      document.removeEventListener('keydown',closeOnEscape);
+    };
+  },[open,activeIndex]);
+
+  function choose(index){
+    const option=options[index];
+    if(!option)return;
+    onChange(option.value);
+    setActiveIndex(index);
+    setOpen(false);
+    triggerRef.current?.focus();
+  }
+  function handleTriggerKeyDown(e){
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+      e.preventDefault();
+      const next=e.key==='ArrowDown'?Math.min(selectedIndex+1,options.length-1):Math.max(selectedIndex-1,0);
+      setActiveIndex(next);
+      setOpen(true);
+    }else if(e.key==='Enter'||e.key===' '){
+      e.preventDefault();
+      setActiveIndex(selectedIndex);
+      setOpen(v=>!v);
+    }
+  }
+  function handleOptionKeyDown(e,index){
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+      e.preventDefault();
+      const next=e.key==='ArrowDown'?Math.min(index+1,options.length-1):Math.max(index-1,0);
+      setActiveIndex(next);
+      optionRefs.current[next]?.focus();
+    }else if(e.key==='Home'||e.key==='End'){
+      e.preventDefault();
+      const next=e.key==='Home'?0:options.length-1;
+      setActiveIndex(next);
+      optionRefs.current[next]?.focus();
+    }else if(e.key==='Enter'||e.key===' '){
+      e.preventDefault();
+      choose(index);
+    }else if(e.key==='Tab'){
+      setOpen(false);
+    }
+  }
+
+  return React.createElement('div',{className:'custom-select-wrap '+className,ref:rootRef},
+    React.createElement('button',{
+      type:'button',
+      ref:triggerRef,
+      className:'custom-select-trigger',
+      'aria-label':ariaLabel,
+      'aria-haspopup':'listbox',
+      'aria-expanded':open,
+      onClick:()=>{setActiveIndex(selectedIndex);setOpen(v=>!v)},
+      onKeyDown:handleTriggerKeyDown
+    },
+      React.createElement('span',{className:'custom-select-value'+(selected&&selected.value===''?' placeholder':'')},selected?.label||'Choose an option'),
+      React.createElement('span',{className:'custom-select-chevron','aria-hidden':'true'},'⌄')
+    ),
+    open&&React.createElement('div',{className:'custom-select-menu',role:'listbox','aria-label':ariaLabel},
+      options.map((option,index)=>React.createElement('button',{
+        key:String(option.value)+'-'+index,
+        type:'button',
+        ref:el=>{optionRefs.current[index]=el},
+        role:'option',
+        'aria-selected':option.value===value,
+        tabIndex:activeIndex===index?0:-1,
+        className:'custom-select-option'+(option.value===value?' selected':'')+(index===activeIndex?' active':''),
+        onClick:()=>choose(index),
+        onKeyDown:e=>handleOptionKeyDown(e,index)
+      },
+        React.createElement('span',{className:'custom-select-option-label'},option.label),
+        option.value===value&&React.createElement('span',{className:'custom-select-check','aria-hidden':'true'},'✓')
+      ))
+    )
   );
 }
 
@@ -245,9 +340,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
             React.createElement('div',{className:'p-price'},'R '+calcPrice(getSvc(p.key),getDur(p.key),getAdd(p.key),false).toLocaleString())
           ),
           React.createElement('label',{className:'field-label'},'Treatment'),
-          React.createElement('select',{className:'input',style:{marginBottom:8},value:getSvc(p.key),onChange:e=>{setPSvc(prev=>({...prev,[p.key]:e.target.value}));setConfirmed(false)}},
-            Object.values(SERVICES).filter(s=>s.id!=='couples').map(s=>React.createElement('option',{key:s.id,value:s.id},s.name))
-          ),
+          React.createElement(CustomSelect,{value:getSvc(p.key),className:'treatment-select',options:Object.values(SERVICES).filter(s=>s.id!=='couples').map(s=>({value:s.id,label:s.name})),onChange:value=>{setPSvc(prev=>({...prev,[p.key]:value}));setConfirmed(false)},ariaLabel:'Choose treatment'}),
           React.createElement('span',{className:'field-label'},'Duration'),
           React.createElement('div',{style:{display:'flex',gap:6,marginBottom:12,flexWrap:'wrap'}},
             Object.keys(SERVICES[getSvc(p.key)].durations).map(d=>React.createElement('button',{key:d,type:'button',className:'dur-btn'+(getDur(p.key)===Number(d)?' active':''),onClick:()=>{setPDur(prev=>({...prev,[p.key]:Number(d)}));setConfirmed(false)}},d+' min'))
@@ -286,10 +379,7 @@ function EventBuilder({event,setEvent,onNext,onBack}){
     React.createElement('div',{className:'step-sub'},'Tell us about the occasion and our concierge will tailor the experience.'),
     React.createElement('div',{className:'field-group'},
       React.createElement('label',{className:'field-label'},'Event Type'),
-      React.createElement('select',{className:'input',value:event.eventType,onChange:set('eventType')},
-        React.createElement('option',{value:''},'Select an event'),
-        ['Bridal Party','Birthday','Wedding','Private Celebration','Wellness Retreat','Other'].map(v=>React.createElement('option',{key:v,value:v},v))
-      )
+      React.createElement(CustomSelect,{value:event.eventType,className:'event-select',options:[{value:'',label:'Select an event'},...['Bridal Party','Birthday','Wedding','Private Celebration','Wellness Retreat','Other'].map(v=>({value:v,label:v}))],onChange:value=>setEvent(prev=>({...prev,eventType:value})),ariaLabel:'Choose event type'})
     ),
     React.createElement('div',{className:'field-group'},
       React.createElement('label',{className:'field-label'},'Estimated Guests'),
