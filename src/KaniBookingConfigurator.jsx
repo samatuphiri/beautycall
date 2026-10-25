@@ -235,6 +235,10 @@ function GuestBuilder({mode,group,setGroup,addItem,setItems,items,onNext,onBack}
           React.createElement('button',{type:'button',className:'toggle-opt'+(guestCount===2?' active':''),onClick:()=>{setGuestCount(2);setConfirmed(false)}},'Two guests')
         )
       ),
+      !isGroup&&guestCount===2&&React.createElement('div',{className:'info-box',style:{marginBottom:16}},
+        React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},'Choose each guest’s treatment below. For a dedicated simultaneous or sequential Couples Massage package, '),
+        React.createElement('a',{className:'concierge-link',href:'https://wa.me/27624771887?text=Hi%20BeautyCall%2C%20I%27d%20like%20to%20enquire%20about%20a%20Couples%20Massage%20package.',target:'_blank',rel:'noopener noreferrer'},'contact our concierge.')
+      ),
       isGroup&&count<3&&React.createElement('div',{className:'info-box'},React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)'}},'Small group bookings start at 3 guests. Add at least 3 guests to continue.')),
       parts.length>0&&React.createElement('div',null,
         parts.map(p=>React.createElement('div',{key:p.key,className:'p-card'},
