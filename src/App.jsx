@@ -73,6 +73,7 @@ export default function KaniLanding() {
   const [calYear, setCalYear] = useState(2026);
   const [address, setAddress] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const serviceTrackRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -108,7 +109,18 @@ export default function KaniLanding() {
         body { background: #0a1128; }
         @media (prefers-reduced-motion: reduce) {
           html { scroll-behavior: auto; }
+          .service-track { scroll-behavior: auto !important; }
         }
+        .service-track { display:flex; gap:14px; overflow-x:auto; scroll-snap-type:x mandatory; scroll-behavior:smooth; padding:8px 2px 18px; scrollbar-width:thin; scrollbar-color:rgba(212,165,162,.65) rgba(255,255,255,.06); }
+        .service-track::-webkit-scrollbar { height:5px; }
+        .service-track::-webkit-scrollbar-track { background:rgba(255,255,255,.06); border-radius:5px; }
+        .service-track::-webkit-scrollbar-thumb { background:rgba(212,165,162,.65); border-radius:5px; }
+        .service-slide { flex:0 0 clamp(210px, 24%, 270px); min-height:138px; scroll-snap-align:start; border:1px solid rgba(255,255,255,.1); border-radius:18px; padding:22px; background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018)); display:flex; flex-direction:column; justify-content:space-between; transition:border-color .25s,background .25s,transform .25s; }
+        .service-slide:hover { border-color:rgba(212,165,162,.55); background:linear-gradient(145deg,rgba(212,165,162,.10),rgba(255,255,255,.025)); transform:translateY(-2px); }
+        .service-arrow { width:40px; height:40px; border:1px solid rgba(245,235,232,.18); border-radius:50%; background:rgba(255,255,255,.035); color:#f5ebe8; font-size:23px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; transition:all .2s; }
+        .service-arrow:hover { border-color:#d4a5a2; color:#d4a5a2; background:rgba(212,165,162,.08); }
+        .service-arrow:focus-visible,.service-tab:focus-visible { outline:2px solid #d4a5a2; outline-offset:3px; }
+        @media (max-width: 768px) { .service-slide { flex-basis:78%; } .service-arrow { width:36px;height:36px; } }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #0a1128; }
         ::-webkit-scrollbar-thumb { background: #d4a5a2; border-radius: 2px; }
@@ -286,7 +298,7 @@ export default function KaniLanding() {
           {/* Category Tabs */}
           <FadeSection delay={0.1}>
             <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 48, flexWrap: "wrap" }}>
-              {["Individual & Couples", "Group & Events", "Corporate Wellness"].map((cat, i) => (
+              {["Individual & Couples", "Small Groups", "Events & Celebrations", "Corporate Wellness"].map((cat, i) => (
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(i)}
@@ -306,18 +318,24 @@ export default function KaniLanding() {
             </div>
           </FadeSection>
 
-          {/* Service Grid */}
+          {/* Service carousel */}
           <FadeSection delay={0.2}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12 }} className="svc-grid">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 12 }}>
+              <div className="sans" style={{ color: "rgba(245,235,232,.48)", fontSize: 11, letterSpacing: ".12em", textTransform: "uppercase" }}>
+                {categoryServices.length} curated options
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button type="button" className="service-arrow" aria-label="Scroll services left" onClick={() => serviceTrackRef.current?.scrollBy({ left: -300, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" })}>‹</button>
+                <button type="button" className="service-arrow" aria-label="Scroll services right" onClick={() => serviceTrackRef.current?.scrollBy({ left: 300, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" })}>›</button>
+              </div>
+            </div>
+            <div ref={serviceTrackRef} className="service-track" tabIndex={0} aria-label="Browse massage services">
               {categoryServices.map((svc, i) => (
-                <div
-                  key={svc}
-                  className="card card-hover"
-                  style={{ borderRadius: 20, padding: "20px 20px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}
-                >
-                  <span style={{ fontSize: 15, fontWeight: 300 }}>{svc}</span>
-                  <span style={{ color: "#d4a5a2", marginLeft: 8 }}>+</span>
-                </div>
+                <article key={svc} className="service-slide">
+                  <div className="tag" style={{ fontSize: 9, letterSpacing: ".18em" }}>Experience {String(i + 1).padStart(2, "0")}</div>
+                  <div style={{ fontSize: 21, fontWeight: 300, lineHeight: 1.25, marginTop: 22 }}>{svc}</div>
+                  <div style={{ color: "#d4a5a2", fontSize: 18, alignSelf: "flex-end", marginTop: 16 }} aria-hidden="true">↗</div>
+                </article>
               ))}
             </div>
           </FadeSection>
