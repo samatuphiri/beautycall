@@ -9,8 +9,11 @@ const services = {
     "Royalty Massage", "Couples Massage"
   ],
   group: [
-    "Family Wellness Experience", "Kids Massage", "Bridal Party Recovery",
-    "Birthday Wellness Events", "Group Relaxation Sessions"
+    "Family Wellness Experience", "Kids Massage", "Group Relaxation Sessions"
+  ],
+  events: [
+    "Bridal Party Recovery", "Birthday Wellness Events", "Wedding Wellness",
+    "Private Celebrations", "Wellness Retreats"
   ],
   corporate: [
     "Corporate Wellness Days", "Sports Event Recovery", "Ongoing Wellness Programs"
@@ -85,7 +88,7 @@ export default function KaniLanding() {
     const dur = durations[selectedDuration];
     const addonList = selectedAddons.map((i) => addons[i]).join(", ") || "None";
     const msg = encodeURIComponent(
-      `Hello BeautyCall!\n\nI'd like to book a session:\n\nAddress: ${address || "[To be confirmed]"}\nCategory: ${["Individual & Couples", "Group & Events", "Corporate Wellness"][activeCategory]}\nService: ${svc}\nDuration: ${dur}\nAdd-ons: ${addonList}\nDate: ${selectedDate} May 2026 at ${TIMES[selectedTime]}\n\nThank you!`
+      `Hello BeautyCall!\n\nI'd like to book a session:\n\nAddress: ${address || "[To be confirmed]"}\nCategory: ${["Individual & Couples", "Small Groups", "Events & Celebrations", "Corporate Wellness"][activeCategory]}\nService: ${svc}\nDuration: ${dur}\nAdd-ons: ${addonList}\nDate: ${selectedDate} May 2026 at ${TIMES[selectedTime]}\n\nThank you!`
     );
     window.open(`https://wa.me/27624771887?text=${msg}`, "_blank");
   };
@@ -94,7 +97,7 @@ export default function KaniLanding() {
   const firstDay = getFirstDay(calYear, calMonth);
   const monthName = new Date(calYear, calMonth).toLocaleString("default", { month: "long" });
 
-  const categoryServices = activeCategory === 0 ? services.individual : activeCategory === 1 ? services.group : services.corporate;
+  const categoryServices = activeCategory === 0 ? services.individual : activeCategory === 1 ? services.group : activeCategory === 2 ? services.events : services.corporate;
 
   return (
     <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", background: "#0a1128", color: "#f5ebe8", minHeight: "100vh", overflowX: "hidden" }}>
@@ -225,7 +228,7 @@ export default function KaniLanding() {
             </FadeSection>
             <FadeSection delay={0.3}>
               <div style={{ marginTop: 56, display: "flex", gap: 48 }}>
-                {[["14+", "Treatments"], ["3", "Categories"], ["Cape Town", "Coverage"]].map(([n, l]) => (
+                {[["14+", "Treatments"], ["4", "Categories"], ["Cape Town", "Coverage"]].map(([n, l]) => (
                   <div key={l}>
                     <div style={{ fontSize: 28, fontWeight: 300, letterSpacing: "-0.02em" }}>{n}</div>
                     <div className="tag" style={{ marginTop: 4 }}>{l}</div>
