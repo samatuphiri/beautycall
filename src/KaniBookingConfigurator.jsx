@@ -80,10 +80,11 @@ export default function KaniBookingConfigurator(){
   const next=()=>setStep(s=>Math.min(s+1,N-1));
   const back=()=>setStep(s=>Math.max(s-1,0));
   const addItem=it=>setItems(p=>[...p,{...it,id:uuid()}]);
+  const selectCategory=id=>{setCat(id);setItems([])};
   const rmItem=id=>setItems(p=>p.filter(x=>x.id!==id));
 
   function sendWA(){
-    const therapists=items.reduce((s,it)=>s+(it.therapistCount||1),0);
+    const therapists=items.reduce((max,it)=>Math.max(max,it.therapistCount||1),0);
     const lines=items.map(it=>{
       const adds=it.addons.map(a=>ADDONS[a]?.name).filter(Boolean);
       return`  - ${it.label?it.label+' — ':''}${SERVICES[it.serviceId]?.name} (${it.duration}min)${adds.length?' + '+adds.join(', '):''}  R${it.price}`;
@@ -106,8 +107,8 @@ export default function KaniBookingConfigurator(){
       React.createElement('div',{className:'step-dots'},Array.from({length:N},(_,i)=>React.createElement('div',{key:i,className:`step-dot${i===step?' active':i<step?' done':''}`})))
     ),
     step===0&&React.createElement(S1Intent,{intent,setIntent,onNext:next}),
-    step===1&&React.createElement(S2Category,{cat,setCat,onNext:next,onBack:back}),
-    step===2&&React.createElement(S3Builder,{cat,items,addItem,rmItem,group,setGroup,corp,setCorp,event,setEvent,onNext:next,onBack:back}),
+    step===1&&React.createElement(S2Category,{cat,setCat:selectCategory,onNext:next,onBack:back}),
+    step===2&&React.createElement(S3Builder,{cat,items,addItem,rmItem,setItems,group,setGroup,corp,setCorp,event,setEvent,onNext:next,onBack:back}),
     step===3&&React.createElement(S4Date,{date,setDate,onNext:next,onBack:back}),
     step===4&&React.createElement(S5Time,{time,setTime,items,onNext:next,onBack:back}),
     step===5&&React.createElement(S6Address,{addr,setAddr,onNext:next,onBack:back}),
@@ -157,13 +158,13 @@ function S2Category({cat,setCat,onNext,onBack}){
   );
 }
 
-function S3Builder({cat,items,addItem,rmItem,group,setGroup,corp,setCorp,event,setEvent,onNext,onBack}){
+function S3Builder({cat,items,addItem,rmItem,setItems,group,setGroup,corp,setCorp,event,setEvent,onNext,onBack}){
   if(cat==='corporate')return React.createElement(CorpBuilder,{corp,setCorp,onNext,onBack});
   if(cat==='events')return React.createElement(EventBuilder,{event,setEvent,onNext,onBack});
-  return React.createElement(GuestBuilder,{mode:cat==='group'?'group':'individual',group,setGroup,addItem,items,onNext,onBack});
+  return React.createElement(GuestBuilder,{mode:cat==='group'?'group':'individual',group,setGroup,addItem,setItems,items,onNext,onBack});
 }
 
-function GuestBuilder({mode,group,setGroup,addItem,items,onNext,onBack}){
+function GuestBuilder({mode,group,setGroup,addItem,setItems,items,onNext,onBack}){
   const isGroup=mode==='group';
   const[guestCount,setGuestCount]=useState(1);
   const[pSvc,setPSvc]=useState({});
@@ -194,7 +195,7 @@ function GuestBuilder({mode,group,setGroup,addItem,items,onNext,onBack}){
   }
   function confirm(){
     if(count<1||count>8||(isGroup&&count<3))return;
-    parts.forEach(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);addItem({serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:1,label:p.type+' '+p.num})});
+    setItems(parts.map(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);return {id:uuid(),serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:sid==='royalty'?2:1,label:p.type+' '+p.num}}));
     setConfirmed(true);
   }
   return React.createElement('div',{className:'fx'},
@@ -448,7 +449,7 @@ function S6Address({addr,setAddr,onNext,onBack}){
 function S7Summary({intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,event,onNext,onBack}){
   const isCorp=cat==='corporate';
   const isQuote=isCorp||cat==='events';
-  const therapists=items.reduce((s,it)=>s+(it.therapistCount||1),0);
+  const therapists=items.reduce((max,it)=>Math.max(max,it.therapistCount||1),0);
   return React.createElement('div',{className:'fx'},
     React.createElement('div',{className:'step-eyebrow'},'Step 07'),
     React.createElement('div',{className:'step-title'},'Review your booking'),
