@@ -264,6 +264,9 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
   const[pDur,setPDur]=useState({});
   const[pAdd,setPAdd]=useState({});
   const[confirmed,setConfirmed]=useState(false);
+  const[couplesPackage,setCouplesPackage]=useState(false);
+  const[couplesTherapists,setCouplesTherapists]=useState(1);
+  const[couplesDuration,setCouplesDuration]=useState(90);
   const count=isGroup?group.adults+group.children:guestCount;
   const parts=useMemo(()=>Array.from({length:count},(_,i)=>({type:isGroup?(i<group.adults?'Adult':'Child'):'Guest',num:isGroup?(i<group.adults?i+1:i-group.adults+1):i+1,key:isGroup?(i<group.adults?'a'+i:'c'+(i-group.adults)):'g'+i})),[count,isGroup,group.adults,group.children]);
   const getSvc=k=>pSvc[k]||'swedish';
@@ -288,7 +291,11 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
   }
   function confirm(){
     if(count<1||count>8||(isGroup&&count<3))return;
-    setItems(parts.map(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);return {id:uuid(),serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:sid==='royalty'?2:1,label:p.type+' '+p.num}}));
+    if(!isGroup&&couplesPackage){
+      setItems([{id:uuid(),serviceId:'couples',duration:couplesDuration,addons:[],price:calcPrice('couples',couplesDuration,[],couplesTherapists===2),therapistCount:couplesTherapists,label:'Couples Massage — '+(couplesTherapists===2?'simultaneous':'sequential')}]);
+    }else{
+      setItems(parts.map(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);return {id:uuid(),serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:sid==='royalty'?2:1,label:p.type+' '+p.num}}));
+    }
     setConfirmed(true);
   }
   return React.createElement('div',{className:'fx'},
@@ -329,18 +336,38 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
         )
       ),
       !isGroup&&guestCount===2&&React.createElement('div',{className:'info-box',style:{marginBottom:16}},
-        React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},'Choose each guest’s treatment below. For a dedicated simultaneous or sequential Couples Massage package, '),
-        React.createElement('a',{className:'concierge-link',href:'https://wa.me/27624771887?text=Hi%20BeautyCall%2C%20I%27d%20like%20to%20enquire%20about%20a%20Couples%20Massage%20package.',target:'_blank',rel:'noopener noreferrer'},'contact our concierge.')
+        React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},'Booking for two? Personalise each guest’s treatment below, or choose a dedicated Couples Massage package.'),
+        React.createElement('button',{type:'button',className:'btn-ghost',style:{marginTop:12,width:'100%'},onClick:()=>{setCouplesPackage(v=>!v);setConfirmed(false)}},couplesPackage?'Use individual treatments instead':'Choose Couples Massage package')
       ),
       isGroup&&count<3&&React.createElement('div',{className:'info-box'},React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)'}},'Small group bookings start at 3 guests. Add at least 3 guests to continue.')),
-      parts.length>0&&React.createElement('div',null,
+      !isGroup&&couplesPackage&&React.createElement('div',{className:'p-card',style:{marginBottom:16}},
+        React.createElement('div',{className:'p-head'},
+          React.createElement('div',{className:'p-name'},'Couples Massage'),
+          React.createElement('div',{className:'p-price'},'R '+calcPrice('couples',couplesDuration,[],couplesTherapists===2).toLocaleString())
+        ),
+        React.createElement('div',{className:'field-label'},'Therapist arrangement'),
+        React.createElement('div',{className:'toggle-row'},
+          React.createElement('button',{type:'button',className:'toggle-opt'+(couplesTherapists===1?' active':''),onClick:()=>{setCouplesTherapists(1);setConfirmed(false)}},'1 therapist · sequential'),
+          React.createElement('button',{type:'button',className:'toggle-opt'+(couplesTherapists===2?' active':''),onClick:()=>{setCouplesTherapists(2);setConfirmed(false)}},'2 therapists · simultaneous')
+        ),
+        React.createElement('div',{className:'info-box',style:{margin:'10px 0 16px'}},React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},couplesTherapists===1?'One therapist massages each partner in sequence. The selected duration applies to each partner.':'Two therapists work simultaneously, one with each partner. The selected duration applies to both partners.')),
+        React.createElement('div',{className:'field-label'},'Session duration'),
+        React.createElement('div',{style:{display:'flex',gap:6,marginBottom:12,flexWrap:'wrap'}},
+          Object.keys(SERVICES.couples.durations).map(d=>React.createElement('button',{key:d,type:'button',className:'dur-btn'+(couplesDuration===Number(d)?' active':''),onClick:()=>{setCouplesDuration(Number(d));setConfirmed(false)}},d+' min'))
+        ),
+        React.createElement('div',{className:'price-row'},
+          React.createElement('div',null,React.createElement('div',{className:'price-label'},'Couples package total'),React.createElement('div',{className:'price-val'},'R '+calcPrice('couples',couplesDuration,[],couplesTherapists===2).toLocaleString())),
+          React.createElement('button',{className:'add-btn',onClick:confirm},'Confirm Couples Massage')
+        )
+      ),
+      parts.length>0&&(!couplesPackage||isGroup)&&React.createElement('div',null,
         parts.map(p=>React.createElement('div',{key:p.key,className:'p-card'},
           React.createElement('div',{className:'p-head'},
             React.createElement('div',{className:'p-name'},p.type+' '+p.num),
             React.createElement('div',{className:'p-price'},'R '+calcPrice(getSvc(p.key),getDur(p.key),getAdd(p.key),false).toLocaleString())
           ),
           React.createElement('label',{className:'field-label'},'Treatment'),
-          React.createElement(CustomSelect,{value:getSvc(p.key),className:'treatment-select',options:Object.values(SERVICES).filter(s=>s.id!=='couples').map(s=>({value:s.id,label:s.name})),onChange:value=>{setPSvc(prev=>({...prev,[p.key]:value}));setConfirmed(false)},ariaLabel:'Choose treatment'}),
+          React.createElement(CustomSelect,{value:getSvc(p.key),className:'treatment-select',options:[SERVICES.royalty,...Object.values(SERVICES).filter(s=>s.id!=='couples'&&s.id!=='royalty')].map(s=>({value:s.id,label:s.name})),onChange:value=>{setPSvc(prev=>({...prev,[p.key]:value}));setConfirmed(false)},ariaLabel:'Choose treatment'}),
           React.createElement('span',{className:'field-label'},'Duration'),
           React.createElement('div',{style:{display:'flex',gap:6,marginBottom:12,flexWrap:'wrap'}},
             Object.keys(SERVICES[getSvc(p.key)].durations).map(d=>React.createElement('button',{key:d,type:'button',className:'dur-btn'+(getDur(p.key)===Number(d)?' active':''),onClick:()=>{setPDur(prev=>({...prev,[p.key]:Number(d)}));setConfirmed(false)}},d+' min'))
