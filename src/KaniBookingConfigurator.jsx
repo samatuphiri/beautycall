@@ -85,17 +85,59 @@ export default function KaniBookingConfigurator(){
   function sendWA(){
     const simultaneousIndividual=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous');
     const therapists=simultaneousIndividual?items.reduce((sum,it)=>sum+(it.therapistCount||1),0):items.reduce((max,it)=>Math.max(max,it.therapistCount||1),0);
-    const arrangementDetails=items.some(it=>it.bookingArrangement)?'\nGuest Arrangement: '+(simultaneousIndividual?'Simultaneous — guests are treated at the same time':'Sequential — guests are treated one after the other'):'';
-    const staffingPremiumDetails=simultaneousStaffingPremium?'\nSimultaneous Staffing Premium: R'+simultaneousStaffingPremium+' (additional therapists are required to treat both guests at the same time)':'';
+    const arrangementDetails=items.some(it=>it.bookingArrangement)?'\\nArrangement: '+(simultaneousIndividual?'Both guests treated at the same time':'Guests treated one after the other'):'';
+    const staffingPremiumDetails=simultaneousStaffingPremium?'\\nAdditional staffing for simultaneous treatment: R'+simultaneousStaffingPremium:'';
     const lines=items.map(it=>{
       const adds=it.addons.map(a=>ADDONS[a]?.name).filter(Boolean);
-      return`  - ${it.label?it.label+' — ':''}${SERVICES[it.serviceId]?.name} (${it.duration}min)${adds.length?' + '+adds.join(', '):''}  R${it.price}`;
-    }).join('\n');
-    const corpDetails=cat==='corporate'?`\nCompany: ${corp.company}\nCorporate Contact: ${corp.contact}\nAttendees: ${corp.attendees}\nEvent: ${corp.eventType||'Not specified'}\nCorporate Location: ${corp.location||'Not specified'}`:'';
-    const eventDetails=cat==='events'?`\nEvent Contact: ${event.contact||'Not specified'}\nGuests: ${event.attendees}\nEvent Type: ${event.eventType||'Not specified'}\nEvent Location: ${event.location||'Not specified'}\nEvent Notes: ${event.notes||'None'}`:'';
-    const groupDetails=cat==='group'?`\nGroup Type: ${group.eventType||'Not specified'}\nGroup Size: ${group.adults+group.children}`:'';
-    const pricingDetails=(cat==='corporate'||cat==='events')?'':'\n\nServices:\n'+lines+arrangementDetails+staffingPremiumDetails+'\nTherapists Required: '+therapists+'\nEstimated Treatment Duration: '+totalMins+' minutes\nBase Total: R'+baseTotal+'\nAfter-Hours Fee: R'+ahFee+'\nFinal Investment: R'+final;
-    const msg=`New Booking Request – BeautyCall\n\nCustomer: ${addr.name}\nIntent: ${INTENTS.find(i=>i.id===intent)?.label}\nCategory: ${CATEGORIES.find(c=>c.id===cat)?.label}${corpDetails}${eventDetails}${groupDetails}\nDate: ${fmtDate(date)}\nTime: ${time}\nService Address: ${addr.street}, ${addr.suburb}${pricingDetails}\n\nAccess Notes: ${addr.notes||'None'}\nAdditional Notes: ${addr.additionalNotes||'None'}`;
+      return `• ${it.label?it.label+' — ':''}${SERVICES[it.serviceId]?.name} (${it.duration} min)${adds.length?' + '+adds.join(', '):''} — R${it.price.toLocaleString()}`;
+    }).join('\\n');
+    const experience=INTENTS.find(i=>i.id===intent)?.label;
+    const location=[addr.street,addr.suburb].filter(Boolean).join(', ');
+    const dateTime=[fmtDate(date),time].filter(Boolean).join(' at ');
+    const notes=[addr.notes? 'Access details: '+addr.notes:'',addr.additionalNotes? 'Anything else we should know: '+addr.additionalNotes:''].filter(Boolean).join('\\n');
+    let msg='';
+    if(cat==='corporate'){
+      msg=`Hi BeautyCall team! 👋
+
+I'd love to enquire about arranging massage and wellness services for our team. Here are the details so far:
+
+Company: ${corp.company}
+Contact: ${corp.contact||addr.name}
+Number of attendees: ${corp.attendees}
+Occasion: ${corp.eventType||'Not decided yet'}
+Location: ${corp.location||location||'To be confirmed'}
+Preferred date and time: ${dateTime||'To be discussed'}
+
+Could you help me explore the options and put together a tailored quote? Thanks — I look forward to hearing from you!`;
+    }else if(cat==='events'){
+      msg=`Hi BeautyCall team! 👋
+
+I'm planning an event and would love to explore having BeautyCall there. Here are the details:
+
+Event: ${event.eventType||'Not specified yet'}
+Number of guests: ${event.attendees}
+Contact name: ${event.contact||addr.name}
+Location: ${event.location||location||'To be confirmed'}
+Preferred date and time: ${dateTime||'To be discussed'}${event.notes?'\\nA little more about the event: '+event.notes:''}
+
+Could you let me know what options might work and help me with a quote? Thank you!`;
+    }else{
+      const bookingType=cat==='couples'?'a couples massage':cat==='group'?'a group massage experience':cat==='individual'?'a massage':'a massage experience';
+      const pricing=(cat==='corporate'||cat==='events')?'':`\\n\\nMy treatment selection:
+${lines}${arrangementDetails}${staffingPremiumDetails}
+Estimated treatment time: ${totalMins} minutes
+Estimated total: R${final.toLocaleString()}`;
+      const groupInfo=cat==='group'? `\\nGroup occasion: ${group.eventType||'Not specified yet'}\\nGuests: ${group.adults+group.children}`:'';
+      msg=`Hi BeautyCall! 👋
+
+I'd love to arrange ${bookingType}${experience?' for a '+experience.toLowerCase()+' experience':''} and check your availability.
+
+Name: ${addr.name}
+Preferred date and time: ${dateTime||'To be confirmed'}
+Location: ${location||'To be confirmed'}${groupInfo}${pricing}
+
+${notes?notes+'\\n\\n':''}Would you please let me know if this works and if you need anything else from me? Looking forward to hearing from you. Thank you!`;
+    }
     window.open(`https://wa.me/27624771887?text=${encodeURIComponent(msg)}`,'_blank');
   }
 
