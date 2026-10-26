@@ -63,6 +63,15 @@ function fmtDate(d){if(!d)return'';return`${d.getDate()} ${MONTHS[d.getMonth()]}
 
 export default function KaniBookingConfigurator(){
   const[step,setStep]=useState(0);
+  const bookingRootRef=useRef(null);
+  const previousStepRef=useRef(0);
+  useEffect(()=>{
+    if(previousStepRef.current===step)return;
+    previousStepRef.current=step;
+    const root=bookingRootRef.current;
+    if(!root)return;
+    requestAnimationFrame(()=>root.scrollIntoView({behavior:'auto',block:'start'}));
+  },[step]);
   const[intent,setIntent]=useState(null);
   const[cat,setCat]=useState(null);
   const[items,setItems]=useState([]);
@@ -141,7 +150,7 @@ ${notes?notes+'\n\n':''}Would you please let me know if this works and if you ne
     window.open(`https://wa.me/27624771887?text=${encodeURIComponent(msg)}`,'_blank');
   }
 
-  return React.createElement('div',{className:'kani-booking-root wrap'},
+  return React.createElement('div',{ref:bookingRootRef,className:'kani-booking-root wrap'},
     React.createElement('div',{className:'site-header'},
       React.createElement('div',{className:'site-logo'},'BeautyCall'),
       React.createElement('div',{className:'site-sub'},'Mobile Massage Therapy')
