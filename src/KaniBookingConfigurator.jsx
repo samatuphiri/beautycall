@@ -322,7 +322,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
           React.createElement('span',{className:'premium-service-kicker'},'SHARED LUXURY'),
           React.createElement('span',{className:'premium-service-title'},'Couples Massage'),
           React.createElement('span',{className:'premium-service-description'},'A shared premium experience, with two therapists treating you at the same time.'),
-          React.createElement('span',{className:'premium-service-price'},'From R 1,900'),
+          React.createElement('span',{className:'premium-service-price'},'From R 1,800'),
           React.createElement('span',{className:'premium-service-cta'},'Create your couples experience  ↗')
         )
       ),
