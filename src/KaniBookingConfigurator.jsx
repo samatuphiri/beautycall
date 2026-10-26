@@ -323,6 +323,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
           React.createElement('span',{className:'premium-service-cta'},'Create your couples experience  ↗')
         )
       ),
+      !isGroup&&React.createElement('div',{className:'booking-choice-divider'},React.createElement('span',null,'OR CUSTOMISE YOUR OWN BOOKING')),
       isGroup&&React.createElement('div',null,
         React.createElement('div',{className:'pills-wrap'},EVENT_TYPES.map(e=>React.createElement('button',{key:e,className:'pill'+(group.eventType===e?' active':''),onClick:()=>setGroup(g=>({...g,eventType:e}))},e))),
         React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:20}},
@@ -352,11 +353,11 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
         React.createElement('span',{className:'field-label'},'Number of guests'),
         React.createElement('div',{className:'toggle-row'},
           React.createElement('button',{type:'button',className:'toggle-opt'+(guestCount===1?' active':''),onClick:()=>{setGuestCount(1);setCouplesPackage(false);setConfirmed(false)}},'One guest'),
-          React.createElement('button',{type:'button',className:'toggle-opt'+(guestCount===2?' active':''),onClick:()=>{setGuestCount(2);setConfirmed(false)}},'Two guests')
+          React.createElement('button',{type:'button',className:'toggle-opt'+(guestCount===2?' active':''),onClick:()=>{setGuestCount(2);setCouplesPackage(false);setConfirmed(false)}},'Two guests')
         )
       ),
       !isGroup&&guestCount===2&&React.createElement('div',{className:'info-box',style:{marginBottom:16}},
-        React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},'Booking for two? Personalise each guest’s treatment below, or choose a dedicated Couples Massage package.'),
+        React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},'Choose two individual treatments below, or select the Couples Massage card above for a shared experience.'),
         React.createElement('button',{type:'button',className:'btn-ghost',style:{marginTop:12,width:'100%'},onClick:()=>{setCouplesPackage(v=>!v);setConfirmed(false)}},couplesPackage?'Use individual treatments instead':'Choose Couples Massage package')
       ),
       isGroup&&count<3&&React.createElement('div',{className:'info-box'},React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)'}},'Small group bookings start at 3 guests. Add at least 3 guests to continue.')),
