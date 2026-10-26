@@ -114,7 +114,7 @@ export default function KaniBookingConfigurator(){
     step===3&&React.createElement(S4Date,{date,setDate,onNext:next,onBack:back}),
     step===4&&React.createElement(S5Time,{time,setTime,items,onNext:next,onBack:back}),
     step===5&&React.createElement(S6Address,{addr,setAddr,onNext:next,onBack:back}),
-    step===6&&React.createElement(S7Summary,{intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,event,onNext:next,onBack:back}),
+    step===6&&React.createElement(S7Summary,{intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,event,simultaneousRoyaltyFee,onNext:next,onBack:back}),
     step===7&&React.createElement(S8Checkout,{sendWA,onBack:back,final,cat})
   );
 }
@@ -590,7 +590,7 @@ function S6Address({addr,setAddr,onNext,onBack}){
     )
   );
 }
-function S7Summary({intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,event,onNext,onBack}){
+function S7Summary({intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,event,simultaneousRoyaltyFee,onNext,onBack}){
   const isCorp=cat==='corporate';
   const isQuote=isCorp||cat==='events';
   const simultaneousIndividual=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous');
