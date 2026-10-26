@@ -14,8 +14,8 @@ const SERVICES={
   bns:{id:'bns',name:'Back, Neck & Shoulders',description:'Focused upper-body tension relief.',durations:{45:700}},
   legWork:{id:'legWork',name:'Leg Work',description:'Targeted lower-body treatment.',durations:{45:700,60:800}},
   geriatric:{id:'geriatric',name:'Geriatric Massage',description:'Gentle massage adapted for older adults.',durations:{60:750}},
-  couples:{id:'couples',name:'Couples Massage',description:'A shared massage experience.',durations:{60:1400,90:1800,120:2200},simultaneousDurations:{60:1900,90:2300,120:2700}},
-  royalty:{id:'royalty',name:'Royalty Massage',description:'Four-handed signature luxury experience.',durations:{60:2000,90:2900,120:3700}},
+  couples:{id:'couples',name:'Couples Massage',description:'A shared massage experience.',durations:{60:1400,90:1800,120:2200},simultaneousDurations:{60:1800,90:2200,120:2600}},
+  royalty:{id:'royalty',name:'Royalty Massage',description:'Four-handed signature luxury experience.',durations:{60:2000,90:2700,120:3300}},
 };
 
 const ADDONS={
