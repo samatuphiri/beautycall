@@ -267,7 +267,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
   const[pAdd,setPAdd]=useState({});
   const[confirmed,setConfirmed]=useState(false);
   const[couplesPackage,setCouplesPackage]=useState(false);
-  const[couplesTherapists,setCouplesTherapists]=useState(1);
+  const[couplesTherapists,setCouplesTherapists]=useState(2);
   const[couplesDuration,setCouplesDuration]=useState(90);
   const[individualArrangement,setIndividualArrangement]=useState('sequential');
   const count=isGroup?group.adults+group.children:guestCount;
@@ -295,7 +295,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
   function confirm(){
     if(count<1||count>8||(isGroup&&count<3))return;
     if(!isGroup&&guestCount===2&&couplesPackage){
-      setItems([{id:uuid(),serviceId:'couples',duration:couplesDuration,addons:[],price:calcPrice('couples',couplesDuration,[],couplesTherapists===2),therapistCount:couplesTherapists,label:'Couples Massage — '+(couplesTherapists===2?'simultaneous':'sequential')}]);
+      setItems([{id:uuid(),serviceId:'couples',duration:couplesDuration,addons:[],price:calcPrice('couples',couplesDuration,[],true),therapistCount:2,label:'Couples Massage — simultaneous'}]);
     }else{
       const arrangement=!isGroup&&guestCount===2?individualArrangement:null;
       setItems(parts.map(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);return {id:uuid(),serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:sid==='royalty'?2:1,bookingArrangement:arrangement,label:p.type+' '+p.num+(arrangement?' — '+(arrangement==='simultaneous'?'simultaneous individual treatment':'sequential individual treatment'):'')}}));
@@ -318,8 +318,8 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
         React.createElement('button',{type:'button',className:'premium-service-card'+(couplesPackage?' selected':''),onClick:()=>{setGuestCount(2);setCouplesPackage(true);setConfirmed(false)}},
           React.createElement('span',{className:'premium-service-kicker'},'SHARED LUXURY'),
           React.createElement('span',{className:'premium-service-title'},'Couples Massage'),
-          React.createElement('span',{className:'premium-service-description'},'A shared escape for two, with a choice of sequential or simultaneous treatments.'),
-          React.createElement('span',{className:'premium-service-price'},'From R 1,400'),
+          React.createElement('span',{className:'premium-service-description'},'A shared premium experience, with two therapists treating you at the same time.'),
+          React.createElement('span',{className:'premium-service-price'},'From R 1,900'),
           React.createElement('span',{className:'premium-service-cta'},'Create your couples experience  ↗')
         )
       ),
@@ -371,8 +371,8 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
       ),
       !isGroup&&couplesPackage&&React.createElement('div',{className:'p-card',style:{marginBottom:16}},
         React.createElement('div',{className:'p-head'},
-          React.createElement('div',{className:'p-name'},'Couples Massage'),
-          React.createElement('div',{className:'p-price'},'R '+calcPrice('couples',couplesDuration,[],couplesTherapists===2).toLocaleString())
+          React.createElement('div',{className:'p-name'},'Couples Massage · Simultaneous'),
+          React.createElement('div',{className:'p-price'},'R '+calcPrice('couples',couplesDuration,[],true).toLocaleString())
         ),
         React.createElement('div',{className:'field-label'},'Therapist arrangement'),
         React.createElement('div',{className:'toggle-row'},
@@ -385,7 +385,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
           Object.keys(SERVICES.couples.durations).map(d=>React.createElement('button',{key:d,type:'button',className:'dur-btn'+(couplesDuration===Number(d)?' active':''),onClick:()=>{setCouplesDuration(Number(d));setConfirmed(false)}},d+' min'))
         ),
         React.createElement('div',{className:'price-row'},
-          React.createElement('div',null,React.createElement('div',{className:'price-label'},'Couples package total'),React.createElement('div',{className:'price-val'},'R '+calcPrice('couples',couplesDuration,[],couplesTherapists===2).toLocaleString())),
+          React.createElement('div',null,React.createElement('div',{className:'price-label'},'Couples package total'),React.createElement('div',{className:'price-val'},'R '+calcPrice('couples',couplesDuration,[],true).toLocaleString())),
           React.createElement('button',{className:'add-btn',onClick:confirm},'Confirm Couples Massage')
         )
       ),
