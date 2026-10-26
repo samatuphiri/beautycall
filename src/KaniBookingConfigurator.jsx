@@ -374,12 +374,8 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
           React.createElement('div',{className:'p-name'},'Couples Massage · Simultaneous'),
           React.createElement('div',{className:'p-price'},'R '+calcPrice('couples',couplesDuration,[],true).toLocaleString())
         ),
-        React.createElement('div',{className:'field-label'},'Therapist arrangement'),
-        React.createElement('div',{className:'toggle-row'},
-          React.createElement('button',{type:'button',className:'toggle-opt'+(couplesTherapists===1?' active':''),onClick:()=>{setCouplesTherapists(1);setConfirmed(false)}},'1 therapist · sequential'),
-          React.createElement('button',{type:'button',className:'toggle-opt'+(couplesTherapists===2?' active':''),onClick:()=>{setCouplesTherapists(2);setConfirmed(false)}},'2 therapists · simultaneous')
-        ),
-        React.createElement('div',{className:'info-box',style:{margin:'10px 0 16px'}},React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},couplesTherapists===1?'One therapist massages each partner in sequence. The selected duration applies to each partner.':'Two therapists work simultaneously, one with each partner. The selected duration applies to both partners.')),
+        React.createElement('div',{className:'field-label'},'Two therapists · both guests treated together'),
+        React.createElement('div',{className:'info-box',style:{margin:'10px 0 16px'}},React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},'The selected duration applies to each guest.')),
         React.createElement('div',{className:'field-label'},'Session duration'),
         React.createElement('div',{style:{display:'flex',gap:6,marginBottom:12,flexWrap:'wrap'}},
           Object.keys(SERVICES.couples.durations).map(d=>React.createElement('button',{key:d,type:'button',className:'dur-btn'+(couplesDuration===Number(d)?' active':''),onClick:()=>{setCouplesDuration(Number(d));setConfirmed(false)}},d+' min'))
