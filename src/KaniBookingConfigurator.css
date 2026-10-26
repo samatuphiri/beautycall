@@ -547,3 +547,11 @@
 .kani-booking-root .premium-service-price{font-size:12px;letter-spacing:.04em;color:var(--cream);margin-top:2px}
 .kani-booking-root .premium-service-cta{font-size:11px;letter-spacing:.05em;color:var(--blush);margin-top:5px}
 @media(min-width:560px){.kani-booking-root .premium-service-grid{grid-template-columns:1fr 1fr}.kani-booking-root .premium-service-card{min-height:205px;padding:22px}}
+
+/* Clean divider between featured treatments and custom booking */
+.kani-booking-root .booking-choice-divider{display:flex;align-items:center;gap:12px;margin:4px 0 22px;color:var(--cream-faint);font-size:9px;letter-spacing:.18em;text-align:center}
+.kani-booking-root .booking-choice-divider:before,.kani-booking-root .booking-choice-divider:after{content:"";height:1px;flex:1;background:var(--navy-border)}
+.kani-booking-root .premium-service-grid{gap:10px;margin-bottom:18px}
+.kani-booking-root .premium-service-card{gap:6px;padding:17px 18px;border-radius:12px}
+.kani-booking-root .premium-service-title{font-size:24px}
+@media(min-width:560px){.kani-booking-root .premium-service-card{min-height:180px;padding:20px}}
