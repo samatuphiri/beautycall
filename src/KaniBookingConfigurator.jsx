@@ -74,8 +74,8 @@ export default function KaniBookingConfigurator(){
   const[event,setEvent]=useState({contact:'',attendees:3,eventType:'',location:'',notes:''});
   const N=8;
   const totalMins=useMemo(()=>{if(items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous'))return Math.max(...items.map(it=>parseInt(it.duration)||60));return items.reduce((s,it)=>s+((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1)),0)},[items]);
-  const simultaneousRoyaltyFee=items.length===2&&items.every(it=>it.serviceId==='royalty'&&it.bookingArrangement==='simultaneous')?300:0;
-  const baseTotal=useMemo(()=>items.reduce((s,it)=>s+it.price,0)+simultaneousRoyaltyFee,[items,simultaneousRoyaltyFee]);
+  const simultaneousStaffingPremium=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?300:0;
+  const baseTotal=useMemo(()=>items.reduce((s,it)=>s+it.price,0)+simultaneousStaffingPremium,[items,simultaneousStaffingPremium]);
   const ahFee=useMemo(()=>time?calcAH(time,totalMins):0,[time,totalMins]);
   const final=baseTotal+ahFee;
   const next=()=>setStep(s=>Math.min(s+1,N-1));
@@ -86,7 +86,7 @@ export default function KaniBookingConfigurator(){
     const simultaneousIndividual=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous');
     const therapists=simultaneousIndividual?items.reduce((sum,it)=>sum+(it.therapistCount||1),0):items.reduce((max,it)=>Math.max(max,it.therapistCount||1),0);
     const arrangementDetails=items.some(it=>it.bookingArrangement)?'\nGuest Arrangement: '+(simultaneousIndividual?'Simultaneous — guests are treated at the same time':'Sequential — guests are treated one after the other'):'';
-    const royaltyFeeDetails=simultaneousRoyaltyFee?'\nSimultaneous Royalty Staffing Premium: R'+simultaneousRoyaltyFee:'';
+    const staffingPremiumDetails=simultaneousStaffingPremium?'\nSimultaneous Staffing Premium: R'+simultaneousStaffingPremium+' (additional therapists are required to treat both guests at the same time)':'';
     const lines=items.map(it=>{
       const adds=it.addons.map(a=>ADDONS[a]?.name).filter(Boolean);
       return`  - ${it.label?it.label+' — ':''}${SERVICES[it.serviceId]?.name} (${it.duration}min)${adds.length?' + '+adds.join(', '):''}  R${it.price}`;
@@ -94,7 +94,7 @@ export default function KaniBookingConfigurator(){
     const corpDetails=cat==='corporate'?`\nCompany: ${corp.company}\nCorporate Contact: ${corp.contact}\nAttendees: ${corp.attendees}\nEvent: ${corp.eventType||'Not specified'}\nCorporate Location: ${corp.location||'Not specified'}`:'';
     const eventDetails=cat==='events'?`\nEvent Contact: ${event.contact||'Not specified'}\nGuests: ${event.attendees}\nEvent Type: ${event.eventType||'Not specified'}\nEvent Location: ${event.location||'Not specified'}\nEvent Notes: ${event.notes||'None'}`:'';
     const groupDetails=cat==='group'?`\nGroup Type: ${group.eventType||'Not specified'}\nGroup Size: ${group.adults+group.children}`:'';
-    const pricingDetails=(cat==='corporate'||cat==='events')?'':'\n\nServices:\n'+lines+arrangementDetails+royaltyFeeDetails+'\nTherapists Required: '+therapists+'\nEstimated Treatment Duration: '+totalMins+' minutes\nBase Total: R'+baseTotal+'\nAfter-Hours Fee: R'+ahFee+'\nFinal Investment: R'+final;
+    const pricingDetails=(cat==='corporate'||cat==='events')?'':'\n\nServices:\n'+lines+arrangementDetails+staffingPremiumDetails+'\nTherapists Required: '+therapists+'\nEstimated Treatment Duration: '+totalMins+' minutes\nBase Total: R'+baseTotal+'\nAfter-Hours Fee: R'+ahFee+'\nFinal Investment: R'+final;
     const msg=`New Booking Request – BeautyCall\n\nCustomer: ${addr.name}\nIntent: ${INTENTS.find(i=>i.id===intent)?.label}\nCategory: ${CATEGORIES.find(c=>c.id===cat)?.label}${corpDetails}${eventDetails}${groupDetails}\nDate: ${fmtDate(date)}\nTime: ${time}\nService Address: ${addr.street}, ${addr.suburb}${pricingDetails}\n\nAccess Notes: ${addr.notes||'None'}\nAdditional Notes: ${addr.additionalNotes||'None'}`;
     window.open(`https://wa.me/27624771887?text=${encodeURIComponent(msg)}`,'_blank');
   }
@@ -114,7 +114,7 @@ export default function KaniBookingConfigurator(){
     step===3&&React.createElement(S4Date,{date,setDate,onNext:next,onBack:back}),
     step===4&&React.createElement(S5Time,{time,setTime,items,onNext:next,onBack:back}),
     step===5&&React.createElement(S6Address,{addr,setAddr,onNext:next,onBack:back}),
-    step===6&&React.createElement(S7Summary,{intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,event,simultaneousRoyaltyFee,onNext:next,onBack:back}),
+    step===6&&React.createElement(S7Summary,{intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,event,simultaneousStaffingPremium,onNext:next,onBack:back}),
     step===7&&React.createElement(S8Checkout,{sendWA,onBack:back,final,cat})
   );
 }
@@ -284,8 +284,8 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
     const remaining=faceHead.includes(id)?current.filter(a=>!faceHead.includes(a)):current;
     return {...p,[k]:[...remaining,id]};
   });
-  const simultaneousRoyaltyFee=!isGroup&&guestCount===2&&individualArrangement==='simultaneous'&&getSvc('g0')==='royalty'&&getSvc('g1')==='royalty'?300:0;
-  const groupTotal=parts.reduce((sum,p)=>sum+calcPrice(getSvc(p.key),getDur(p.key),getAdd(p.key),false),0)+simultaneousRoyaltyFee;
+  const simultaneousStaffingPremium=!isGroup&&guestCount===2&&individualArrangement==='simultaneous'?300:0;
+  const groupTotal=parts.reduce((sum,p)=>sum+calcPrice(getSvc(p.key),getDur(p.key),getAdd(p.key),false),0)+simultaneousStaffingPremium;
   function updateCount(type,delta){
     setConfirmed(false);
     if(!isGroup){setGuestCount(n=>Math.max(1,Math.min(2,n+delta)));return;}
@@ -408,13 +408,17 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
             React.createElement('div',{className:'price-val'},'R '+groupTotal.toLocaleString())
           ),
           React.createElement('button',{className:'add-btn',disabled:(isGroup?count<3:count<1)||count>8,onClick:confirm},'Confirm '+(isGroup?'Group':'Guests'))
+        ),
+        !isGroup&&guestCount===2&&individualArrangement==='simultaneous'&&React.createElement('div',{className:'info-box',style:{marginTop:12}},
+          React.createElement('div',{style:{fontSize:10,letterSpacing:'0.12em',textTransform:'uppercase',color:'var(--blush)',marginBottom:4}},'Simultaneous Staffing Premium · R300'),
+          React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},'An additional R300 applies because separate therapist staffing is required to treat both guests at the same time. This premium is included in the combined booking total above.')
         )
       )
     ),
     confirmed&&React.createElement('div',{className:'info-box'},
       React.createElement('div',{style:{fontSize:13,color:'var(--blush)',marginBottom:4,letterSpacing:'0.08em',textTransform:'uppercase'}},'Treatments confirmed'),
       React.createElement('div',{style:{fontFamily:'var(--serif)',fontSize:22,color:'var(--cream)',fontWeight:300}},parts.length+' guest'+(parts.length===1?'':'s')),
-      React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',marginTop:4}},'Combined treatment total: R '+(items.reduce((sum,it)=>sum+it.price,0)+(items.length===2&&items.every(it=>it.serviceId==='royalty'&&it.bookingArrangement==='simultaneous')?300:0)).toLocaleString())
+      React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',marginTop:4}},'Combined treatment total: R '+(items.reduce((sum,it)=>sum+it.price,0)+(items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?300:0)).toLocaleString())
     ),
     React.createElement('div',{className:'nav-row'},
       React.createElement('button',{className:'btn-ghost',onClick:onBack},'← Back'),
@@ -590,7 +594,7 @@ function S6Address({addr,setAddr,onNext,onBack}){
     )
   );
 }
-function S7Summary({intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,event,simultaneousRoyaltyFee,onNext,onBack}){
+function S7Summary({intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,event,simultaneousStaffingPremium,onNext,onBack}){
   const isCorp=cat==='corporate';
   const isQuote=isCorp||cat==='events';
   const simultaneousIndividual=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous');
@@ -625,12 +629,12 @@ function S7Summary({intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,e
           React.createElement('div',{className:'summ-row-price'},'R '+it.price.toLocaleString())
         );
       }),
-      !isQuote&&simultaneousRoyaltyFee>0&&React.createElement('div',{className:'summ-row'},
+      !isQuote&&simultaneousStaffingPremium>0&&React.createElement('div',{className:'summ-row'},
         React.createElement('div',null,
-          React.createElement('div',{style:{fontSize:13,color:'var(--cream-dim)'}},'Simultaneous Royalty Staffing Premium'),
-          React.createElement('div',{style:{fontSize:11,color:'var(--cream-dim)',marginTop:3}},'Additional staffing for two four-handed treatments delivered together')
+          React.createElement('div',{style:{fontSize:13,color:'var(--cream-dim)'}},'Simultaneous Staffing Premium'),
+          React.createElement('div',{style:{fontSize:11,color:'var(--cream-dim)',marginTop:3}},'Additional therapist staffing required to treat both guests at the same time')
         ),
-        React.createElement('div',{className:'summ-row-price'},'R '+simultaneousRoyaltyFee.toLocaleString())
+        React.createElement('div',{className:'summ-row-price'},'R '+simultaneousStaffingPremium.toLocaleString())
       ),
       !isQuote&&React.createElement('div',null,
         React.createElement('div',{className:'summ-row'},
