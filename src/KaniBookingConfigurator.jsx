@@ -534,7 +534,7 @@ function S4Date({date,setDate,onNext,onBack}){
 }
 
 function S5Time({time,setTime,items,onNext,onBack}){
-  const totalMins=items.reduce((s,it)=>s+(parseInt(it.duration)||60),0);
+  const totalMins=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?Math.max(...items.map(it=>parseInt(it.duration)||60)):items.reduce((s,it)=>s+((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1)),0);
   const surcharge=time?calcAH(time,totalMins):0;
   let endStr='';
   if(time){const[h,m]=time.split(':').map(Number);const e=h*60+m+totalMins;endStr=`${String(Math.floor(e/60)).padStart(2,'0')}:${String(e%60).padStart(2,'0')}`}
@@ -597,7 +597,8 @@ function S6Address({addr,setAddr,onNext,onBack}){
 function S7Summary({intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,event,onNext,onBack}){
   const isCorp=cat==='corporate';
   const isQuote=isCorp||cat==='events';
-  const therapists=items.reduce((max,it)=>Math.max(max,it.therapistCount||1),0);
+  const simultaneousIndividual=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous');
+  const therapists=simultaneousIndividual?items.reduce((sum,it)=>sum+(it.therapistCount||1),0):items.reduce((max,it)=>Math.max(max,it.therapistCount||1),0);
   return React.createElement('div',{className:'fx'},
     React.createElement('div',{className:'step-eyebrow'},'Step 07'),
     React.createElement('div',{className:'step-title'},'Review your booking'),
