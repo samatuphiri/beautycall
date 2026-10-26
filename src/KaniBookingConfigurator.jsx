@@ -303,6 +303,22 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
     React.createElement('div',{className:'step-title'},isGroup?'Small Group Experience':'Personalise Each Guest’s Experience'),
     React.createElement('div',{className:'step-sub'},isGroup?'Choose 3–8 guests, then customise each person’s treatment.':'Choose one or two guests, then select a treatment for each person.'),
     !confirmed&&React.createElement('div',null,
+      !isGroup&&React.createElement('div',{className:'premium-service-grid'},
+        React.createElement('button',{type:'button',className:'premium-service-card'+(!couplesPackage&&guestCount===1&&getSvc('g0')==='royalty'?' selected':''),onClick:()=>{setGuestCount(1);setCouplesPackage(false);setPSvc(prev=>({...prev,g0:'royalty'}));setConfirmed(false)}},
+          React.createElement('span',{className:'premium-service-kicker'},'SIGNATURE EXPERIENCE'),
+          React.createElement('span',{className:'premium-service-title'},'Royalty Massage'),
+          React.createElement('span',{className:'premium-service-description'},'An indulgent four-handed massage, with two therapists working in harmony.'),
+          React.createElement('span',{className:'premium-service-price'},'From R 2,000'),
+          React.createElement('span',{className:'premium-service-cta'},'Explore Royalty  ↗')
+        ),
+        React.createElement('button',{type:'button',className:'premium-service-card'+(couplesPackage?' selected':''),onClick:()=>{setGuestCount(2);setCouplesPackage(true);setConfirmed(false)}},
+          React.createElement('span',{className:'premium-service-kicker'},'SHARED LUXURY'),
+          React.createElement('span',{className:'premium-service-title'},'Couples Massage'),
+          React.createElement('span',{className:'premium-service-description'},'A shared escape for two, with a choice of sequential or simultaneous treatments.'),
+          React.createElement('span',{className:'premium-service-price'},'From R 1,400'),
+          React.createElement('span',{className:'premium-service-cta'},'Create your couples experience  ↗')
+        )
+      ),
       isGroup&&React.createElement('div',null,
         React.createElement('div',{className:'pills-wrap'},EVENT_TYPES.map(e=>React.createElement('button',{key:e,className:'pill'+(group.eventType===e?' active':''),onClick:()=>setGroup(g=>({...g,eventType:e}))},e))),
         React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:20}},
