@@ -122,15 +122,15 @@ Preferred date and time: ${dateTime||'To be discussed'}${event.notes?'\nA little
 
 Could you let me know what options might work and help me with a quote? Thank you!`;
     }else{
-      const bookingType=cat==='couples'?'a couples massage':cat==='group'?'a group massage experience':cat==='individual'?'a massage':'a massage experience';
+      const bookingType=items.some(it=>it.serviceId==='couples')?'a couples massage':cat==='group'?'a group massage experience':'a massage';
       const pricing=(cat==='corporate'||cat==='events')?'':`\n\nMy treatment selection:
 ${lines}${arrangementDetails}${staffingPremiumDetails}
-Estimated treatment time: ${totalMins} minutes
+Estimated treatment time: ${totalMins} minutes${ahFee?'\nAfter-hours fee: R'+ahFee.toLocaleString():''}
 Estimated total: R${final.toLocaleString()}`;
       const groupInfo=cat==='group'? `\nGroup occasion: ${group.eventType||'Not specified yet'}\nGuests: ${group.adults+group.children}`:'';
       msg=`Hi BeautyCall! 👋
 
-I'd love to arrange ${bookingType}${experience?' for a '+experience.toLowerCase()+' experience':''} and check your availability.
+I'd love to arrange ${bookingType} and check your availability.${experience?' I’m looking for a '+experience.toLowerCase()+' experience.':''}
 
 Name: ${addr.name}
 Preferred date and time: ${dateTime||'To be confirmed'}
