@@ -285,7 +285,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
     return {...p,[k]:[...remaining,id]};
   });
   const simultaneousStaffingPremium=!isGroup&&guestCount===2&&individualArrangement==='simultaneous'?300:0;
-  const groupTotal=parts.reduce((sum,p)=>sum+calcPrice(getSvc(p.key),getDur(p.key),getAdd(p.key),false),0)+simultaneousStaffingPremium;
+  const groupTotal=!isGroup&&guestCount===2&&couplesPackage?calcPrice('couples',couplesDuration,[],true):parts.reduce((sum,p)=>sum+calcPrice(getSvc(p.key),getDur(p.key),getAdd(p.key),false),0)+simultaneousStaffingPremium;
   function updateCount(type,delta){
     setConfirmed(false);
     if(!isGroup){setGuestCount(n=>Math.max(1,Math.min(2,n+delta)));return;}
@@ -304,7 +304,11 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
       setItems(parts.map(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);return {id:uuid(),serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:sid==='royalty'?2:1,bookingArrangement:arrangement,label:p.type+' '+p.num+(arrangement?' — '+(arrangement==='simultaneous'?'simultaneous individual treatment':'sequential individual treatment'):'')}}));
     }
     setConfirmed(true);
+    onNext();
   }
+  const summaryItems = !isGroup&&guestCount===2&&couplesPackage
+    ? [{key:'couples-package',label:'Couples Massage',serviceId:'couples',duration:couplesDuration,addons:[],price:calcPrice('couples',couplesDuration,[],true),detail:'Two guests · simultaneous'}]
+    : parts.map(p=>({key:p.key,label:p.type+' '+p.num,serviceId:getSvc(p.key),duration:getDur(p.key),addons:getAdd(p.key),price:calcPrice(getSvc(p.key),getDur(p.key),getAdd(p.key),false),detail:isGroup?'Group treatment':(!isGroup&&guestCount===2?(individualArrangement==='simultaneous'?'Simultaneous':'Sequential'):'Individual treatment')}));
   return React.createElement('div',{className:'fx'},
     React.createElement('div',{className:'step-eyebrow'},'Step 03'),
     React.createElement('div',{className:'step-title'},isGroup?'Small Group Experience':'Personalise Each Guest’s Experience'),
@@ -382,7 +386,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
         ),
         React.createElement('div',{className:'price-row'},
           React.createElement('div',null,React.createElement('div',{className:'price-label'},'Couples package total'),React.createElement('div',{className:'price-val'},'R '+calcPrice('couples',couplesDuration,[],true).toLocaleString())),
-          React.createElement('button',{className:'add-btn',onClick:confirm},'Confirm Couples Massage')
+          React.createElement('span',{className:'price-label'},'Package selected')
         )
       ),
       parts.length>0&&(!couplesPackage||isGroup)&&React.createElement('div',null,
@@ -407,22 +411,32 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
             React.createElement('div',{className:'price-label'},'Combined booking total'),
             React.createElement('div',{className:'price-val'},'R '+groupTotal.toLocaleString())
           ),
-          React.createElement('button',{className:'add-btn',disabled:(isGroup?count<3:count<1)||count>8,onClick:confirm},'Confirm '+(isGroup?'Group':'Guests'))
         ),
-        !isGroup&&guestCount===2&&individualArrangement==='simultaneous'&&React.createElement('div',{className:'info-box',style:{marginTop:12}},
-          React.createElement('div',{style:{fontSize:10,letterSpacing:'0.12em',textTransform:'uppercase',color:'var(--blush)',marginBottom:4}},'Simultaneous Staffing Premium · R300'),
-          React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},'An additional R300 applies because separate therapist staffing is required to treat both guests at the same time. This premium is included in the combined booking total above.')
-        )
       )
     ),
-    confirmed&&React.createElement('div',{className:'info-box'},
-      React.createElement('div',{style:{fontSize:13,color:'var(--blush)',marginBottom:4,letterSpacing:'0.08em',textTransform:'uppercase'}},'Treatments confirmed'),
-      React.createElement('div',{style:{fontFamily:'var(--serif)',fontSize:22,color:'var(--cream)',fontWeight:300}},parts.length+' guest'+(parts.length===1?'':'s')),
-      React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',marginTop:4}},'Combined treatment total: R '+(items.reduce((sum,it)=>sum+it.price,0)+(items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?300:0)).toLocaleString())
+    React.createElement('div',{className:'booking-breakdown'},
+      React.createElement('div',{className:'booking-breakdown-heading'},'Your treatment breakdown'),
+      summaryItems.map(item=>React.createElement('div',{key:item.key,className:'booking-breakdown-item'},
+        React.createElement('div',{className:'booking-breakdown-copy'},
+          React.createElement('div',{className:'booking-breakdown-name'},item.label+' · '+SERVICES[item.serviceId]?.name),
+          React.createElement('div',{className:'booking-breakdown-detail'},item.duration+' minutes'+(item.addons.length?' · '+item.addons.map(a=>ADDONS[a]?.name).filter(Boolean).join(', '):'')+' · '+item.detail),
+          item.addons.length>0&&React.createElement('div',{className:'booking-breakdown-detail'},'Enhancements: '+item.addons.map(a=>ADDONS[a]?.name+' (+R'+ADDONS[a]?.price+')').join(', '))
+        ),
+        React.createElement('div',{className:'booking-breakdown-price'},'R '+item.price.toLocaleString())
+      )),
+      !isGroup&&guestCount===2&&couplesPackage===false&&individualArrangement==='simultaneous'&&React.createElement('div',{className:'booking-breakdown-item'},
+        React.createElement('div',{className:'booking-breakdown-copy'},React.createElement('div',{className:'booking-breakdown-name'},'Simultaneous Staffing Premium'),React.createElement('div',{className:'booking-breakdown-detail'},'Additional therapist staffing for both guests')),
+        React.createElement('div',{className:'booking-breakdown-price'},'R 300')
+      ),
+      React.createElement('div',{className:'booking-breakdown-total'},
+        React.createElement('span',null,'Estimated treatment total'),
+        React.createElement('strong',null,'R '+groupTotal.toLocaleString())
+      ),
+      React.createElement('div',{className:'booking-breakdown-note'},'Your date, time and location are collected next. After-hours fees, if applicable, are calculated once your time is selected.')
     ),
     React.createElement('div',{className:'nav-row'},
       React.createElement('button',{className:'btn-ghost',onClick:onBack},'← Back'),
-      React.createElement('button',{className:'btn-primary',disabled:!confirmed,onClick:onNext,style:{flex:1}},'Continue')
+      React.createElement('button',{className:'btn-primary',disabled:(isGroup?count<3:count<1)||count>8,onClick:confirm,style:{flex:1}},'Continue to Date & Time')
     )
   );
 }
