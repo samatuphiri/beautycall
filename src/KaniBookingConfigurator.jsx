@@ -73,7 +73,7 @@ export default function KaniBookingConfigurator(){
   const[corp,setCorp]=useState({company:'',contact:'',attendees:2,eventType:'',location:''});
   const[event,setEvent]=useState({contact:'',attendees:3,eventType:'',location:'',notes:''});
   const N=8;
-  const totalMins=useMemo(()=>items.reduce((s,it)=>s+((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1)),0),[items]);
+  const totalMins=useMemo(()=>{if(items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous'))return Math.max(...items.map(it=>parseInt(it.duration)||60));return items.reduce((s,it)=>s+((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1)),0)},[items]);
   const baseTotal=useMemo(()=>items.reduce((s,it)=>s+it.price,0),[items]);
   const ahFee=useMemo(()=>time?calcAH(time,totalMins):0,[time,totalMins]);
   const final=baseTotal+ahFee;
@@ -82,7 +82,9 @@ export default function KaniBookingConfigurator(){
   const selectCategory=id=>{setCat(id);setItems([])};
 
   function sendWA(){
-    const therapists=items.reduce((max,it)=>Math.max(max,it.therapistCount||1),0);
+    const simultaneousIndividual=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous');
+    const therapists=simultaneousIndividual?items.reduce((sum,it)=>sum+(it.therapistCount||1),0):items.reduce((max,it)=>Math.max(max,it.therapistCount||1),0);
+    const arrangementDetails=items.some(it=>it.bookingArrangement)?'\nGuest Arrangement: '+(simultaneousIndividual?'Simultaneous — guests are treated at the same time':'Sequential — guests are treated one after the other'):'';
     const lines=items.map(it=>{
       const adds=it.addons.map(a=>ADDONS[a]?.name).filter(Boolean);
       return`  - ${it.label?it.label+' — ':''}${SERVICES[it.serviceId]?.name} (${it.duration}min)${adds.length?' + '+adds.join(', '):''}  R${it.price}`;
@@ -90,7 +92,7 @@ export default function KaniBookingConfigurator(){
     const corpDetails=cat==='corporate'?`\nCompany: ${corp.company}\nCorporate Contact: ${corp.contact}\nAttendees: ${corp.attendees}\nEvent: ${corp.eventType||'Not specified'}\nCorporate Location: ${corp.location||'Not specified'}`:'';
     const eventDetails=cat==='events'?`\nEvent Contact: ${event.contact||'Not specified'}\nGuests: ${event.attendees}\nEvent Type: ${event.eventType||'Not specified'}\nEvent Location: ${event.location||'Not specified'}\nEvent Notes: ${event.notes||'None'}`:'';
     const groupDetails=cat==='group'?`\nGroup Type: ${group.eventType||'Not specified'}\nGroup Size: ${group.adults+group.children}`:'';
-    const pricingDetails=(cat==='corporate'||cat==='events')?'':'\n\nServices:\n'+lines+'\n\nTherapists Required: '+therapists+'\nBase Total: R'+baseTotal+'\nAfter-Hours Fee: R'+ahFee+'\nFinal Investment: R'+final;
+    const pricingDetails=(cat==='corporate'||cat==='events')?'':'\n\nServices:\n'+lines+arrangementDetails+'\nTherapists Required: '+therapists+'\nEstimated Treatment Duration: '+totalMins+' minutes\nBase Total: R'+baseTotal+'\nAfter-Hours Fee: R'+ahFee+'\nFinal Investment: R'+final;
     const msg=`New Booking Request – BeautyCall\n\nCustomer: ${addr.name}\nIntent: ${INTENTS.find(i=>i.id===intent)?.label}\nCategory: ${CATEGORIES.find(c=>c.id===cat)?.label}${corpDetails}${eventDetails}${groupDetails}\nDate: ${fmtDate(date)}\nTime: ${time}\nService Address: ${addr.street}, ${addr.suburb}${pricingDetails}\n\nAccess Notes: ${addr.notes||'None'}\nAdditional Notes: ${addr.additionalNotes||'None'}`;
     window.open(`https://wa.me/27624771887?text=${encodeURIComponent(msg)}`,'_blank');
   }
@@ -267,6 +269,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
   const[couplesPackage,setCouplesPackage]=useState(false);
   const[couplesTherapists,setCouplesTherapists]=useState(1);
   const[couplesDuration,setCouplesDuration]=useState(90);
+  const[individualArrangement,setIndividualArrangement]=useState('sequential');
   const count=isGroup?group.adults+group.children:guestCount;
   const parts=useMemo(()=>Array.from({length:count},(_,i)=>({type:isGroup?(i<group.adults?'Adult':'Child'):'Guest',num:isGroup?(i<group.adults?i+1:i-group.adults+1):i+1,key:isGroup?(i<group.adults?'a'+i:'c'+(i-group.adults)):'g'+i})),[count,isGroup,group.adults,group.children]);
   const getSvc=k=>pSvc[k]||'swedish';
@@ -294,7 +297,8 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
     if(!isGroup&&guestCount===2&&couplesPackage){
       setItems([{id:uuid(),serviceId:'couples',duration:couplesDuration,addons:[],price:calcPrice('couples',couplesDuration,[],couplesTherapists===2),therapistCount:couplesTherapists,label:'Couples Massage — '+(couplesTherapists===2?'simultaneous':'sequential')}]);
     }else{
-      setItems(parts.map(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);return {id:uuid(),serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:sid==='royalty'?2:1,label:p.type+' '+p.num}}));
+      const arrangement=!isGroup&&guestCount===2?individualArrangement:null;
+      setItems(parts.map(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);return {id:uuid(),serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:sid==='royalty'?2:1,bookingArrangement:arrangement,label:p.type+' '+p.num+(arrangement?' — '+(arrangement==='simultaneous'?'simultaneous individual treatment':'sequential individual treatment'):'')}}));
     }
     setConfirmed(true);
   }
@@ -356,6 +360,15 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
         React.createElement('button',{type:'button',className:'btn-ghost',style:{marginTop:12,width:'100%'},onClick:()=>{setCouplesPackage(v=>!v);setConfirmed(false)}},couplesPackage?'Use individual treatments instead':'Choose Couples Massage package')
       ),
       isGroup&&count<3&&React.createElement('div',{className:'info-box'},React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)'}},'Small group bookings start at 3 guests. Add at least 3 guests to continue.')),
+      !isGroup&&guestCount===2&&!couplesPackage&&React.createElement('div',{className:'p-card',style:{marginBottom:16}},
+        React.createElement('div',{className:'p-name',style:{marginBottom:10}},'Individual Treatment Arrangement'),
+        React.createElement('div',{className:'field-label'},'How should the two sessions be scheduled?'),
+        React.createElement('div',{className:'toggle-row'},
+          React.createElement('button',{type:'button',className:'toggle-opt'+(individualArrangement==='sequential'?' active':''),onClick:()=>{setIndividualArrangement('sequential');setConfirmed(false)}},React.createElement('div',{className:'toggle-opt-title'},'Sequential'),React.createElement('div',{className:'toggle-opt-sub'},'One therapist at a time')),
+          React.createElement('button',{type:'button',className:'toggle-opt'+(individualArrangement==='simultaneous'?' active':''),onClick:()=>{setIndividualArrangement('simultaneous');setConfirmed(false)}},React.createElement('div',{className:'toggle-opt-title'},'Simultaneous'),React.createElement('div',{className:'toggle-opt-sub'},'Guests treated together'))
+        ),
+        React.createElement('div',{className:'info-box',style:{margin:'8px 0 0'}},React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},individualArrangement==='sequential'?'One therapist treats each guest in turn. Each guest can choose a different treatment and duration; total booking time includes both sessions.':'Both guests are treated at the same time by separate therapists. Each guest keeps their own treatment, duration and price. Royalty remains a four-handed treatment and requires two therapists for that guest.'))
+      ),
       !isGroup&&couplesPackage&&React.createElement('div',{className:'p-card',style:{marginBottom:16}},
         React.createElement('div',{className:'p-head'},
           React.createElement('div',{className:'p-name'},'Couples Massage'),
