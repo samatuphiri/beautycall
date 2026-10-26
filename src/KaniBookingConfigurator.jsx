@@ -318,7 +318,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
           React.createElement('span',{className:'premium-service-price'},'From R 2,000'),
           React.createElement('span',{className:'premium-service-cta'},'Explore Royalty  ↗')
         ),
-        React.createElement('button',{type:'button',className:'premium-service-card'+(couplesPackage?' selected':''),onClick:()=>{setGuestCount(2);setCouplesPackage(true);setConfirmed(false)}},
+        React.createElement('button',{type:'button',className:'premium-service-card'+(couplesPackage?' selected':''),onClick:()=>{if(couplesPackage){setCouplesPackage(false)}else{setGuestCount(2);setCouplesPackage(true)}setConfirmed(false)}},
           React.createElement('span',{className:'premium-service-kicker'},'SHARED LUXURY'),
           React.createElement('span',{className:'premium-service-title'},'Couples Massage'),
           React.createElement('span',{className:'premium-service-description'},'A shared premium experience, with two therapists treating you at the same time.'),
