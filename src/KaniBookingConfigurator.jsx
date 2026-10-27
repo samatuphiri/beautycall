@@ -23,9 +23,9 @@ const ADDONS={
   facialMassage:{id:'facialMassage',name:'Facial Massage',price:150,duration:15},
   headMassage:{id:'headMassage',name:'Head Massage',price:150,duration:15},
   facialHeadMassage:{id:'facialHeadMassage',name:'Facial + Head Massage',price:250,duration:30},
-  bodyExfoliation:{id:'bodyExfoliation',name:'Body Exfoliation',price:350,duration:20},
-  bodyWrap:{id:'bodyWrap',name:'Body Wrap + Exfoliation',price:450,duration:30},
-  footSoak:{id:'footSoak',name:'Foot Soak & Scrub',price:300,duration:25},
+  bodyExfoliation:{id:'bodyExfoliation',name:'Body Exfoliation',price:350,duration:25},
+  bodyWrap:{id:'bodyWrap',name:'Body Wrap + Exfoliation',price:450,duration:35},
+  footSoak:{id:'footSoak',name:'Foot Soak & Scrub',price:300,duration:30},
 };
 
 const SURCHARGES={afterHoursStart:21,feePerHour:150};
