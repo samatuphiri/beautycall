@@ -20,12 +20,12 @@ const SERVICES={
 };
 
 const ADDONS={
-  facialMassage:{id:'facialMassage',name:'Facial Massage',price:150},
-  headMassage:{id:'headMassage',name:'Head Massage',price:150},
-  facialHeadMassage:{id:'facialHeadMassage',name:'Facial + Head Massage',price:250},
-  bodyExfoliation:{id:'bodyExfoliation',name:'Body Exfoliation',price:350},
-  bodyWrap:{id:'bodyWrap',name:'Body Wrap + Exfoliation',price:450},
-  footSoak:{id:'footSoak',name:'Foot Soak & Scrub',price:300},
+  facialMassage:{id:'facialMassage',name:'Facial Massage',price:150,duration:15},
+  headMassage:{id:'headMassage',name:'Head Massage',price:150,duration:15},
+  facialHeadMassage:{id:'facialHeadMassage',name:'Facial + Head Massage',price:250,duration:30},
+  bodyExfoliation:{id:'bodyExfoliation',name:'Body Exfoliation',price:350,duration:20},
+  bodyWrap:{id:'bodyWrap',name:'Body Wrap + Exfoliation',price:450,duration:30},
+  footSoak:{id:'footSoak',name:'Foot Soak & Scrub',price:300,duration:25},
 };
 
 const SURCHARGES={afterHoursStart:21,feePerHour:150};
@@ -83,7 +83,8 @@ export default function KaniBookingConfigurator(){
   const[corp,setCorp]=useState({company:'',contact:'',attendees:2,eventType:'',location:''});
   const[event,setEvent]=useState({contact:'',attendees:3,eventType:'',location:'',notes:''});
   const N=8;
-  const totalMins=useMemo(()=>{if(items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous'))return Math.max(...items.map(it=>parseInt(it.duration)||60));return items.reduce((s,it)=>s+((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1)),0)},[items]);
+  const itemDuration=it=>((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1))+it.addons.reduce((sum,a)=>sum+(ADDONS[a]?.duration||0),0);
+  const totalMins=useMemo(()=>{if(items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous'))return Math.max(...items.map(itemDuration));return items.reduce((s,it)=>s+itemDuration(it),0)},[items]);
   const simultaneousStaffingPremium=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?300:0;
   const baseTotal=useMemo(()=>items.reduce((s,it)=>s+it.price,0)+simultaneousStaffingPremium,[items,simultaneousStaffingPremium]);
   const ahFee=useMemo(()=>time?calcAH(time,totalMins):0,[time,totalMins]);
@@ -98,8 +99,9 @@ export default function KaniBookingConfigurator(){
     const arrangementDetails=items.some(it=>it.bookingArrangement)?'\nArrangement: '+(simultaneousIndividual?'Both guests treated at the same time':'Guests treated one after the other'):'';
     const staffingPremiumDetails=simultaneousStaffingPremium?'\nAdditional staffing for simultaneous treatment: R'+simultaneousStaffingPremium:'';
     const lines=items.map(it=>{
-      const adds=it.addons.map(a=>ADDONS[a]?.name).filter(Boolean);
-      return `• ${it.label?it.label+' — ':''}${SERVICES[it.serviceId]?.name} (${it.duration} min)${adds.length?' + '+adds.join(', '):''} — R${it.price.toLocaleString()}`;
+      const adds=it.addons.map(a=>ADDONS[a]).filter(Boolean);
+      const addText=adds.map(a=>`${a.name} (+${a.duration} min)`);
+      return `• ${it.label?it.label+' — ':''}${SERVICES[it.serviceId]?.name} (${it.duration} min)${addText.length?' + '+addText.join(', '):''} — R${it.price.toLocaleString()}`;
     }).join('\n');
     const experience=INTENTS.find(i=>i.id===intent)?.label;
     const location=[addr.street,addr.suburb].filter(Boolean).join(', ');
@@ -610,7 +612,8 @@ function S4Date({date,setDate,onNext,onBack}){
 }
 
 function S5Time({time,setTime,items,onNext,onBack}){
-  const totalMins=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?Math.max(...items.map(it=>parseInt(it.duration)||60)):items.reduce((s,it)=>s+((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1)),0);
+  const itemDuration=it=>((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1))+it.addons.reduce((sum,a)=>sum+(ADDONS[a]?.duration||0),0);
+  const totalMins=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?Math.max(...items.map(itemDuration)):items.reduce((s,it)=>s+itemDuration(it),0);
   const surcharge=time?calcAH(time,totalMins):0;
   let endStr='';
   if(time){const[h,m]=time.split(':').map(Number);const e=h*60+m+totalMins;endStr=`${String(Math.floor(e/60)).padStart(2,'0')}:${String(e%60).padStart(2,'0')}`}
@@ -700,7 +703,7 @@ function S7Summary({intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,e
         return React.createElement('div',{key:it.id,className:'summ-row'},
           React.createElement('div',null,
             React.createElement('div',{className:'summ-row-name'},(it.label?it.label+' — ':'')+SERVICES[it.serviceId]?.name),
-            React.createElement('div',{className:'summ-row-detail'},it.duration+'min'+(adds.length?' · '+adds.join(', '):''))
+            React.createElement('div',{className:'summ-row-detail'},it.duration+' min'+(adds.length?' · '+adds.map(a=>a+' (+'+(ADDONS[it.addons.find(id=>ADDONS[id]?.name===a)]?.duration||0)+' min)').join(', '):''))
           ),
           React.createElement('div',{className:'summ-row-price'},'R '+it.price.toLocaleString())
         );
