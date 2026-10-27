@@ -466,8 +466,9 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
             ),
             React.createElement('span',{className:'field-label'},'Enhancements'),
             React.createElement('div',{className:'pills-wrap',style:{marginBottom:0}},
-              Object.values(ADDONS).map(a=>React.createElement('button',{key:a.id,type:'button',className:'pill'+(getAdd(p.key).includes(a.id)?' active':''),style:{fontSize:11,padding:'5px 12px'},onClick:()=>{toggleA(p.key,a.id);setConfirmed(false)}},a.name+' +R'+a.price))
-            )
+              Object.values(ADDONS).map(a=>React.createElement('button',{key:a.id,type:'button',className:'pill'+(getAdd(p.key).includes(a.id)?' active':''),style:{fontSize:11,padding:'5px 12px'},onClick:()=>{toggleA(p.key,a.id);setConfirmed(false)}},a.name+' +'+a.duration+' min · R'+a.price))
+            ),
+            React.createElement('div',{className:'booking-breakdown-detail',style:{marginTop:8}},'Enhancements add the displayed time to your selected massage duration. Your total booking time updates automatically.')
           )
         )),
         React.createElement('div',{className:'price-row',style:{marginTop:8}},
