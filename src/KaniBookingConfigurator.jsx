@@ -321,6 +321,8 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
   const[pSvc,setPSvc]=useState({});
   const[pDur,setPDur]=useState({});
   const[pAdd,setPAdd]=useState({});
+  const[pName,setPName]=useState({});
+  const[openCards,setOpenCards]=useState({g0:true,a0:true});
   const[confirmed,setConfirmed]=useState(false);
   const[couplesPackage,setCouplesPackage]=useState(false);
   const[couplesTherapists,setCouplesTherapists]=useState(2);
@@ -356,14 +358,14 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
       setItems([{id:uuid(),serviceId:'couples',duration:couplesDuration,addons:[],price:calcPrice('couples',couplesDuration,[],true),therapistCount:2,label:'Couples Massage — simultaneous'}]);
     }else{
       const arrangement=!isGroup&&guestCount===2?individualArrangement:null;
-      setItems(parts.map(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);return {id:uuid(),serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:sid==='royalty'?2:1,bookingArrangement:arrangement,label:p.type+' '+p.num+(arrangement?' — '+(arrangement==='simultaneous'?'simultaneous individual treatment':'sequential individual treatment'):'')}}));
+      setItems(parts.map(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);return {id:uuid(),serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:sid==='royalty'?2:1,bookingArrangement:arrangement,label:(pName[p.key]?.trim()||p.type+' '+p.num)+(arrangement?' — '+(arrangement==='simultaneous'?'simultaneous individual treatment':'sequential individual treatment'):'')}}));
     }
     setConfirmed(true);
     onNext();
   }
   const summaryItems = !isGroup&&guestCount===2&&couplesPackage
     ? [{key:'couples-package',label:'Couples Massage',serviceId:'couples',duration:couplesDuration,addons:[],price:calcPrice('couples',couplesDuration,[],true),detail:'Two guests · simultaneous'}]
-    : parts.map(p=>({key:p.key,label:p.type+' '+p.num,serviceId:getSvc(p.key),duration:getDur(p.key),addons:getAdd(p.key),price:calcPrice(getSvc(p.key),getDur(p.key),getAdd(p.key),false),detail:isGroup?'Group treatment':(!isGroup&&guestCount===2?(individualArrangement==='simultaneous'?'Simultaneous':'Sequential'):'Individual treatment')}));
+    : parts.map(p=>({key:p.key,label:pName[p.key]?.trim()||p.type+' '+p.num,serviceId:getSvc(p.key),duration:getDur(p.key),addons:getAdd(p.key),price:calcPrice(getSvc(p.key),getDur(p.key),getAdd(p.key),false),detail:isGroup?'Group treatment':(!isGroup&&guestCount===2?(individualArrangement==='simultaneous'?'Simultaneous':'Sequential'):'Individual treatment')}));
   return React.createElement('div',{className:'fx'},
     React.createElement('div',{className:'step-eyebrow'},'Step 03'),
     React.createElement('div',{className:'step-title'},isGroup?'Small Group Experience':'Personalise Each Guest’s Experience'),
@@ -448,29 +450,42 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
         )
       ),
       parts.length>0&&(!couplesPackage||isGroup)&&React.createElement('div',null,
-        parts.map(p=>React.createElement('div',{key:p.key,className:'p-card'},
-          React.createElement('div',{className:'p-head'},
-            React.createElement('div',{className:'p-name'},p.type+' '+p.num),
-            React.createElement('div',{className:'p-price'},'R '+calcPrice(getSvc(p.key),getDur(p.key),getAdd(p.key),false).toLocaleString())
-          ),
-          isChild(p.key)?React.createElement('div',null,
-            React.createElement('div',{className:'field-label'},'Kiddies Massage · 30 minutes'),
-            React.createElement('div',{className:'booking-breakdown-detail'},'Gentle Swedish-style massage for children under 14. Fixed duration and price: R300.'),
-            React.createElement('a',{className:'concierge-link',href:'https://wa.me/27624771887?text='+encodeURIComponent('Hi BeautyCall, I would like to request a different treatment or duration for a child under 14.'),target:'_blank',rel:'noopener noreferrer',style:{display:'inline-block',marginTop:10}},'Request a different option for this child')
-          ):React.createElement('div',null,
-            React.createElement('label',{className:'field-label'},'Treatment'),
-            React.createElement(CustomSelect,{value:getSvc(p.key),className:'treatment-select',options:[SERVICES.royalty,...Object.values(SERVICES).filter(s=>s.id!=='couples'&&s.id!=='royalty'&&s.id!=='kiddies')].map(s=>({value:s.id,label:s.name})),onChange:value=>{setPSvc(prev=>({...prev,[p.key]:value}));setConfirmed(false)},ariaLabel:'Choose treatment'}),
-            React.createElement('span',{className:'field-label'},'Duration'),
-            React.createElement('div',{style:{display:'flex',gap:6,marginBottom:12,flexWrap:'wrap'}},
-              Object.keys(SERVICES[getSvc(p.key)].durations).map(d=>React.createElement('button',{key:d,type:'button',className:'dur-btn'+(getDur(p.key)===Number(d)?' active':''),onClick:()=>{setPDur(prev=>({...prev,[p.key]:Number(d)}));setConfirmed(false)}},d+' min'))
+        parts.map(p=>{
+          const serviceName=SERVICES[getSvc(p.key)]?.name||'Kiddies Massage';
+          const isOpen=!!openCards[p.key];
+          const guestName=pName[p.key]?.trim();
+          const cardLabel=guestName||p.type+' '+p.num;
+          return React.createElement('div',{key:p.key,className:'p-card compact-guest-card'+(isOpen?' is-open':'')},
+            React.createElement('button',{type:'button',className:'guest-card-toggle',onClick:()=>setOpenCards(prev=>({...prev,[p.key]:!prev[p.key]})),'aria-expanded':isOpen},
+              React.createElement('span',{className:'guest-card-main'},
+                React.createElement('span',{className:'guest-card-name'},cardLabel),
+                React.createElement('span',{className:'guest-card-summary'},isChild(p.key)?'Kiddies Massage · 30 min':serviceName+' · '+getDur(p.key)+' min'+(getAdd(p.key).length?' · '+getAdd(p.key).length+' enhancement'+(getAdd(p.key).length>1?'s':''):''))
+              ),
+              React.createElement('span',{className:'guest-card-price'},'R '+calcPrice(getSvc(p.key),getDur(p.key),getAdd(p.key),false).toLocaleString()),
+              React.createElement('span',{className:'guest-card-chevron','aria-hidden':true},isOpen?'−':'+')
             ),
-            React.createElement('span',{className:'field-label'},'Enhancements'),
-            React.createElement('div',{className:'pills-wrap',style:{marginBottom:0}},
-              Object.values(ADDONS).map(a=>React.createElement('button',{key:a.id,type:'button',className:'pill'+(getAdd(p.key).includes(a.id)?' active':''),style:{fontSize:11,padding:'5px 12px'},onClick:()=>{toggleA(p.key,a.id);setConfirmed(false)}},a.name+' +'+a.duration+' min · R'+a.price))
-            ),
-
-          )
-        )),
+            isOpen&&React.createElement('div',{className:'guest-card-content'},
+              React.createElement('label',{className:'field-label'},'Guest name'),
+              React.createElement('input',{className:'input guest-name-input',type:'text',placeholder:'Name for this massage',value:pName[p.key]||'',onChange:e=>{setPName(prev=>({...prev,[p.key]:e.target.value}));setConfirmed(false)}}),
+              isChild(p.key)?React.createElement('div',null,
+                React.createElement('div',{className:'field-label'},'Kiddies Massage · 30 minutes'),
+                React.createElement('div',{className:'booking-breakdown-detail'},'Gentle Swedish-style massage for children under 14. Fixed duration and price: R300.'),
+                React.createElement('a',{className:'concierge-link',href:'https://wa.me/27624771887?text='+encodeURIComponent('Hi BeautyCall, I would like to request a different treatment or duration for a child under 14.'),target:'_blank',rel:'noopener noreferrer',style:{display:'inline-block',marginTop:10}},'Request a different option for this child')
+              ):React.createElement('div',null,
+                React.createElement('label',{className:'field-label'},'Treatment'),
+                React.createElement(CustomSelect,{value:getSvc(p.key),className:'treatment-select',options:[SERVICES.royalty,...Object.values(SERVICES).filter(s=>s.id!=='couples'&&s.id!=='royalty'&&s.id!=='kiddies')].map(s=>({value:s.id,label:s.name})),onChange:value=>{setPSvc(prev=>({...prev,[p.key]:value}));setConfirmed(false)},ariaLabel:'Choose treatment'}),
+                React.createElement('span',{className:'field-label'},'Duration'),
+                React.createElement('div',{style:{display:'flex',gap:6,marginBottom:10,flexWrap:'wrap'}},
+                  Object.keys(SERVICES[getSvc(p.key)].durations).map(d=>React.createElement('button',{key:d,type:'button',className:'dur-btn'+(getDur(p.key)===Number(d)?' active':''),onClick:()=>{setPDur(prev=>({...prev,[p.key]:Number(d)}));setConfirmed(false)}},d+' min'))
+                ),
+                React.createElement('span',{className:'field-label'},'Enhancements'),
+                React.createElement('div',{className:'pills-wrap',style:{marginBottom:0}},
+                  Object.values(ADDONS).map(a=>React.createElement('button',{key:a.id,type:'button',className:'pill'+(getAdd(p.key).includes(a.id)?' active':''),style:{fontSize:11,padding:'5px 12px'},onClick:()=>{toggleA(p.key,a.id);setConfirmed(false)}},a.name+' +'+a.duration+' min · R'+a.price))
+                )
+              )
+            )
+          );
+        }),
         React.createElement('div',{className:'price-row',style:{marginTop:8}},
           React.createElement('div',null,
             React.createElement('div',{className:'price-label'},'Combined booking total'),
