@@ -36,11 +36,12 @@ const INTENTS=[
 ];
 const CATEGORIES=[
   {id:'individual',label:'Individual & Couples',desc:'Personalised treatments for one or two guests'},
-  {id:'group',label:'Small Groups',desc:'Customisable wellness for 3–8 guests'},
+  {id:'group',label:'Small Groups',desc:'Book treatments for 3–8 guests together in a private, informal setting'},
+  {id:'events',label:'Events & Celebrations',desc:'Coordinated massage services for celebrations, retreats and special events'},
   {id:'events',label:'Events & Celebrations',desc:'Bespoke wellness for special occasions'},
   {id:'corporate',label:'Corporate Wellness',desc:'Tailored wellbeing for teams and businesses'},
 ];
-const EVENT_TYPES=['Family Gathering','Bridal Event','Birthday Celebration','Wellness Party','Other'];
+const GROUP_TYPES=['Friends booking together','Family wellness booking','Colleagues booking together','Other'];
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DAYS=['Su','Mo','Tu','We','Th','Fr','Sa'];
 const TIMES=[];
@@ -363,7 +364,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
   return React.createElement('div',{className:'fx'},
     React.createElement('div',{className:'step-eyebrow'},'Step 03'),
     React.createElement('div',{className:'step-title'},isGroup?'Small Group Experience':'Personalise Each Guest’s Experience'),
-    React.createElement('div',{className:'step-sub'},isGroup?'Choose 3–8 guests, then customise each person’s treatment.':'Choose one or two guests, then select a treatment for each person.'),
+    React.createElement('div',{className:'step-sub'},isGroup?'For 3–8 guests booking treatments together in a private, informal setting.':'Choose one or two guests, then select a treatment for each person.'),
     !confirmed&&React.createElement('div',null,
       !isGroup&&React.createElement('div',{className:'premium-service-grid'},
         React.createElement('button',{type:'button',className:'premium-service-card'+(!couplesPackage&&guestCount===1&&getSvc('g0')==='royalty'?' selected':''),onClick:()=>{setGuestCount(1);setCouplesPackage(false);setPSvc(prev=>({...prev,g0:'royalty'}));setConfirmed(false)}},
@@ -383,7 +384,8 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
       ),
       !isGroup&&React.createElement('div',{className:'booking-choice-divider'},React.createElement('span',null,'OR CUSTOMISE YOUR OWN BOOKING')),
       isGroup&&React.createElement('div',null,
-        React.createElement('div',{className:'pills-wrap'},EVENT_TYPES.map(e=>React.createElement('button',{key:e,className:'pill'+(group.eventType===e?' active':''),onClick:()=>setGroup(g=>({...g,eventType:e}))},e))),
+        React.createElement('div',{className:'field-label',style:{marginBottom:8}},'Who is booking together?'),
+        React.createElement('div',{className:'pills-wrap'},GROUP_TYPES.map(e=>React.createElement('button',{key:e,className:'pill'+(group.eventType===e?' active':''),onClick:()=>setGroup(g=>({...g,eventType:e}))},e))),
         React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:20}},
           React.createElement('div',null,
             React.createElement('span',{className:'field-label'},'Adults'),
@@ -497,10 +499,10 @@ function EventBuilder({event,setEvent,onNext,onBack}){
   return React.createElement('div',{className:'fx'},
     React.createElement('div',{className:'step-eyebrow'},'Step 03'),
     React.createElement('div',{className:'step-title'},'Events & Celebrations'),
-    React.createElement('div',{className:'step-sub'},'Tell us about the occasion and our concierge will tailor the experience.'),
+    React.createElement('div',{className:'step-sub'},'For coordinated massage services at a celebration, retreat or larger event. Our concierge will tailor the setup and quote.'),
     React.createElement('div',{className:'field-group'},
       React.createElement('label',{className:'field-label'},'Event Type'),
-      React.createElement(CustomSelect,{value:event.eventType,className:'event-select',options:[{value:'',label:'Select an event'},...['Bridal Party','Birthday','Wedding','Private Celebration','Wellness Retreat','Other'].map(v=>({value:v,label:v}))],onChange:value=>setEvent(prev=>({...prev,eventType:value})),ariaLabel:'Choose event type'})
+      React.createElement(CustomSelect,{value:event.eventType,className:'event-select',options:[{value:'',label:'Select an event'},...['Bridal Party','Birthday Celebration','Wedding','Private Celebration','Wellness Retreat','Other'].map(v=>({value:v,label:v}))],onChange:value=>setEvent(prev=>({...prev,eventType:value})),ariaLabel:'Choose event type'})
     ),
     React.createElement('div',{className:'field-group'},
       React.createElement('label',{className:'field-label'},'Estimated Guests'),
