@@ -324,7 +324,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
   const[couplesDuration,setCouplesDuration]=useState(90);
   const[individualArrangement,setIndividualArrangement]=useState('sequential');
   const count=isGroup?group.adults+group.children:guestCount;
-  const parts=useMemo(()=>Array.from({length:count},(_,i)=>({type:isGroup?(i<group.adults?'Adult':'Child'):'Guest',num:isGroup?(i<group.adults?i+1:i-group.adults+1):i+1,key:isGroup?(i<group.adults?'a'+i:'c'+(i-group.adults)):'g'+i})),[count,isGroup,group.adults,group.children]);
+  const parts=useMemo(()=>Array.from({length:isGroup?group.adults:guestCount},(_,i)=>({type:isGroup?'Guest aged 14+':'Guest',num:i+1,key:isGroup?'a'+i:'g'+i})),[isGroup,group.adults,guestCount]);
   const getSvc=k=>pSvc[k]||'swedish';
   const getDur=k=>{const keys=Object.keys(SERVICES[getSvc(k)].durations).map(Number);const d=pDur[k];return d&&keys.includes(d)?d:keys[1]||keys[0]};
   const getAdd=k=>pAdd[k]||[];
@@ -387,7 +387,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
         React.createElement('div',{className:'pills-wrap'},GROUP_TYPES.map(e=>React.createElement('button',{key:e,className:'pill'+(group.eventType===e?' active':''),onClick:()=>setGroup(g=>({...g,eventType:e}))},e))),
         React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:20}},
           React.createElement('div',null,
-            React.createElement('span',{className:'field-label'},'Adults'),
+            React.createElement('span',{className:'field-label'},'Guests aged 14+'),
             React.createElement('div',{className:'stepper'},
               React.createElement('button',{className:'stp-btn',disabled:group.adults<=0,onClick:()=>updateCount('Adult',-1)},'−'),
               React.createElement('div',{className:'stp-val'},group.adults),
@@ -395,7 +395,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
             )
           ),
           React.createElement('div',null,
-            React.createElement('span',{className:'field-label'},'Children'),
+            React.createElement('span',{className:'field-label'},'Children under 14'),
             React.createElement('div',{className:'stepper'},
               React.createElement('button',{className:'stp-btn',disabled:group.children<=0,onClick:()=>updateCount('Child',-1)},'−'),
               React.createElement('div',{className:'stp-val'},group.children),
@@ -404,8 +404,9 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
           )
         ),
         React.createElement('div',{className:'info-box',style:{marginBottom:16}},
-          React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},'Self-service bookings are available for 3–8 guests. For 9 or more guests, '),
-          React.createElement('a',{className:'concierge-link',href:'https://wa.me/27624771887?text=Hi%20BeautyCall%2C%20I%27d%20like%20a%20bespoke%20quote%20for%20a%20group%20massage%20booking%20for%209%2B%20guests.',target:'_blank',rel:'noopener noreferrer'},'contact our concierge for a bespoke group quote.')
+          React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},group.children>0?'Children under 14 are offered a 30-minute Kiddies Massage (R300), arranged directly with a BeautyCall team member. Group bookings that include children must be handled by our team rather than confirmed online.':'Self-service bookings are available for groups of 3–8 guests aged 14 and older. For 9 or more guests, '),
+          group.children>0&&React.createElement('div',{style:{marginTop:8,fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},'Use the WhatsApp enquiry button below and our team will help arrange the kiddies massage and the rest of your group booking.'),
+          group.children===0&&React.createElement('a',{className:'concierge-link',href:'https://wa.me/27624771887?text=Hi%20BeautyCall%2C%20I%27d%20like%20a%20bespoke%20quote%20for%20a%20group%20massage%20booking%20for%209%2B%20guests.',target:'_blank',rel:'noopener noreferrer'},'contact our concierge for a bespoke group quote.')
         )
       ),
       !isGroup&&React.createElement('div',{className:'field-group'},
@@ -488,7 +489,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
     ),
     React.createElement('div',{className:'nav-row'},
       React.createElement('button',{className:'btn-ghost',onClick:onBack},'← Back'),
-      React.createElement('button',{className:'btn-primary',disabled:(isGroup?count<3:count<1)||count>8,onClick:confirm,style:{flex:1}},'Continue to Date & Time')
+      isGroup&&group.children>0?React.createElement('a',{className:'btn-primary',href:'https://wa.me/27624771887?text='+encodeURIComponent('Hi BeautyCall team! I would like to enquire about a group booking that includes a Kiddies Massage for '+group.children+' child/children under 14. I understand the kiddies massage is 30 minutes at R300 per child and must be arranged directly with a team member. Guests aged 14+: '+group.adults+'. Please help me arrange the booking.'),target:'_blank',rel:'noopener noreferrer',style:{flex:1,textAlign:'center',textDecoration:'none',display:'block'}},'Enquire with our team on WhatsApp'):React.createElement('button',{className:'btn-primary',disabled:(isGroup?count<3:count<1)||count>8,onClick:confirm,style:{flex:1}},'Continue to Date & Time')
     )
   );
 }
