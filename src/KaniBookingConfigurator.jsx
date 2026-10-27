@@ -38,7 +38,6 @@ const CATEGORIES=[
   {id:'individual',label:'Individual & Couples',desc:'Personalised treatments for one or two guests'},
   {id:'group',label:'Small Groups',desc:'Book treatments for 3–8 guests together in a private, informal setting'},
   {id:'events',label:'Events & Celebrations',desc:'Coordinated massage services for celebrations, retreats and special events'},
-  {id:'events',label:'Events & Celebrations',desc:'Bespoke wellness for special occasions'},
   {id:'corporate',label:'Corporate Wellness',desc:'Tailored wellbeing for teams and businesses'},
 ];
 const GROUP_TYPES=['Friends booking together','Family wellness booking','Colleagues booking together','Other'];
