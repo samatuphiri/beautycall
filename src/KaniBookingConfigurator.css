@@ -677,3 +677,14 @@
   .kani-booking-root .guest-card-content .guest-name-input{height:32px;min-height:32px;padding:5px 9px;font-size:12px;margin-bottom:7px}
   .kani-booking-root .guest-card-content .treatment-select{margin-bottom:10px}
 }
+
+/* Compact group-booking information beneath guest counters */
+.kani-booking-root .group-booking-info{padding:10px 12px;text-align:left;border-radius:9px;margin-bottom:10px}
+.kani-booking-root .group-booking-note{font-size:11px;line-height:1.4;color:var(--cream-dim)}
+.kani-booking-root .group-booking-links{display:flex;flex-wrap:wrap;gap:3px 14px;margin-top:5px}
+.kani-booking-root .group-booking-links .concierge-link{font-size:11px;line-height:1.4}
+@media(max-width:600px){
+  .kani-booking-root .group-booking-info{padding:8px 10px}
+  .kani-booking-root .group-booking-note,.kani-booking-root .group-booking-links .concierge-link{font-size:10px}
+  .kani-booking-root .group-booking-links{gap:3px 10px;margin-top:4px}
+}
