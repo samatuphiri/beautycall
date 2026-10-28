@@ -688,3 +688,7 @@
   .kani-booking-root .group-booking-note,.kani-booking-root .group-booking-links .concierge-link{font-size:10px}
   .kani-booking-root .group-booking-links{gap:3px 10px;margin-top:4px}
 }
+
+/* Let custom dropdown menus extend beyond collapsible guest cards */
+.kani-booking-root .compact-guest-card:has(.custom-select-menu){overflow:visible;position:relative;z-index:40}
+.kani-booking-root .compact-guest-card:has(.custom-select-menu) .custom-select-wrap{z-index:60}
