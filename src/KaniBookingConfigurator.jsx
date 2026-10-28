@@ -466,7 +466,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
             ),
             isOpen&&React.createElement('div',{className:'guest-card-content'},
               React.createElement('label',{className:'field-label'},'Guest name'),
-              React.createElement('input',{className:'input guest-name-input',type:'text',placeholder:'Name for this massage',value:pName[p.key]||'',onChange:e=>{setPName(prev=>({...prev,[p.key]:e.target.value}));setConfirmed(false)}}),
+              React.createElement('input',{className:'input guest-name-input',type:'text',placeholder:'',value:pName[p.key]||'',onChange:e=>{setPName(prev=>({...prev,[p.key]:e.target.value}));setConfirmed(false)}}),
               isChild(p.key)?React.createElement('div',null,
                 React.createElement('div',{className:'field-label'},'Kiddies Massage · 30 minutes'),
                 React.createElement('div',{className:'booking-breakdown-detail'},'Gentle Swedish-style massage for children under 14. Fixed duration and price: R300.'),
