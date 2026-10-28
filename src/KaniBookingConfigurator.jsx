@@ -409,11 +409,12 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
             )
           )
         ),
-        React.createElement('div',{className:'info-box',style:{marginBottom:16}},
-          React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},'Small group bookings are for 3–8 guests. Children under 14 are automatically assigned a 30-minute Kiddies Massage at R300. If you would like to request a different treatment or duration for a child, please contact our team.'),
-          React.createElement('a',{className:'concierge-link',href:'https://wa.me/27624771887?text='+encodeURIComponent('Hi BeautyCall, I would like to discuss a treatment or duration request for a child under 14.'),target:'_blank',rel:'noopener noreferrer',style:{display:'inline-block',marginTop:8}},'Request a different option for a child via WhatsApp'),
-          React.createElement('div',{style:{marginTop:8,fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},'For groups of 9 or more, '),
-          React.createElement('a',{className:'concierge-link',href:'https://wa.me/27624771887?text=Hi%20BeautyCall%2C%20I%27d%20like%20a%20bespoke%20quote%20for%20a%20group%20massage%20booking%20for%209%2B%20guests.',target:'_blank',rel:'noopener noreferrer'},'contact our concierge for a bespoke group quote.')
+        React.createElement('div',{className:'info-box group-booking-info',style:{marginBottom:10}},
+          React.createElement('div',{className:'group-booking-note'},'3–8 guests. Children under 14 receive a 30-min Kiddies Massage (R300).'),
+          React.createElement('div',{className:'group-booking-links'},
+            React.createElement('a',{className:'concierge-link',href:'https://wa.me/27624771887?text='+encodeURIComponent('Hi BeautyCall, I would like to discuss a treatment or duration request for a child under 14.'),target:'_blank',rel:'noopener noreferrer'},'Request a child treatment change'),
+            React.createElement('a',{className:'concierge-link',href:'https://wa.me/27624771887?text=Hi%20BeautyCall%2C%20I%27d%20like%20a%20bespoke%20quote%20for%20a%20group%20massage%20booking%20for%209%2B%20guests.',target:'_blank',rel:'noopener noreferrer'},'Booking 9+ guests? Get a quote')
+          )
         )
       ),
       !isGroup&&React.createElement('div',{className:'field-group'},
