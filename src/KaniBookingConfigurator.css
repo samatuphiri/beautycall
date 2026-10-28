@@ -667,3 +667,13 @@
 @media(prefers-reduced-motion:reduce){
   .kani-booking-root .compact-guest-card,.kani-booking-root .guest-card-content{animation:none;transition:none}
 }
+
+/* Compact guest name field: blank placeholder and less vertical space */
+.kani-booking-root .guest-card-content>.field-label:first-child{margin-top:8px;margin-bottom:3px}
+.kani-booking-root .guest-card-content .guest-name-input{height:34px;min-height:34px;padding:6px 10px;font-size:12px;margin-bottom:8px}
+.kani-booking-root .guest-card-content .treatment-select{margin-bottom:12px}
+@media(max-width:600px){
+  .kani-booking-root .guest-card-content>.field-label:first-child{margin-top:6px;margin-bottom:2px}
+  .kani-booking-root .guest-card-content .guest-name-input{height:32px;min-height:32px;padding:5px 9px;font-size:12px;margin-bottom:7px}
+  .kani-booking-root .guest-card-content .treatment-select{margin-bottom:10px}
+}
