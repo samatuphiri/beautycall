@@ -29,7 +29,7 @@ const ADDONS={
 };
 
 const SURCHARGES={afterHoursStart:21,feePerHour:150};
-const ADDITIONAL_THERAPIST_FEE=550;
+const ADDITIONAL_THERAPIST_FEE=400;
 const INTENTS=[
   {id:'relaxation',label:'Relaxation',desc:'Melt away the day, restore calm'},
   {id:'painRelief',label:'Pain Relief',desc:'Targeted care for aches and tension'},
@@ -85,9 +85,9 @@ export default function KaniBookingConfigurator(){
   const[event,setEvent]=useState({contact:'',attendees:3,eventType:'',location:'',notes:''});
   const N=8;
   const itemDuration=it=>((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1))+it.addons.reduce((sum,a)=>sum+(ADDONS[a]?.duration||0),0);
-  const totalMins=useMemo(()=>{if(items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous'))return Math.max(...items.map(itemDuration));return items.reduce((s,it)=>s+itemDuration(it),0)},[items]);
+  const totalMins=useMemo(()=>{if(items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous'))return Math.max(...items.map(itemDuration));const workload=items.reduce((sum,it)=>sum+itemDuration(it),0);return cat==='group'?Math.ceil(workload/Math.max(1,groupTherapistCount)):workload},[items,cat,groupTherapistCount]);
   const simultaneousStaffingPremium=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?300:0;
-  const groupTherapistCount=cat==='group'?Math.max(1,...items.map(it=>it.therapistCount||1)):1;
+  const groupTherapistCount=cat==='group'?Math.max(1,...items.map(it=>it.groupTherapists||1)):1;
   const groupStaffingFee=cat==='group'?Math.max(0,groupTherapistCount-1)*ADDITIONAL_THERAPIST_FEE:0;
   const baseTotal=useMemo(()=>items.reduce((s,it)=>s+it.price,0)+simultaneousStaffingPremium+groupStaffingFee,[items,simultaneousStaffingPremium,groupStaffingFee]);
   const ahFee=useMemo(()=>time?calcAH(time,totalMins):0,[time,totalMins]);
@@ -363,7 +363,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
       setItems([{id:uuid(),serviceId:'couples',duration:couplesDuration,addons:[],price:calcPrice('couples',couplesDuration,[],true),therapistCount:2,label:'Couples Massage — simultaneous'}]);
     }else{
       const arrangement=!isGroup&&guestCount===2?individualArrangement:null;
-      setItems(parts.map(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);return {id:uuid(),serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:sid==='royalty'?2:1,bookingArrangement:arrangement,label:(pName[p.key]?.trim()||p.type+' '+p.num)+(arrangement?' — '+(arrangement==='simultaneous'?'simultaneous individual treatment':'sequential individual treatment'):'')}}).map(it=>isGroup?{...it,therapistCount:Math.max(it.therapistCount||1,groupTherapists)}:it));
+      setItems(parts.map(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);return {id:uuid(),serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:sid==='royalty'?2:1,groupTherapists:isGroup?groupTherapists:undefined,bookingArrangement:arrangement,label:(pName[p.key]?.trim()||p.type+' '+p.num)+(arrangement?' — '+(arrangement==='simultaneous'?'simultaneous individual treatment':'sequential individual treatment'):'')}}));
     }
     setConfirmed(true);
     onNext();
@@ -413,11 +413,6 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
               React.createElement('button',{className:'stp-btn',disabled:count>=8,onClick:()=>updateCount('Child',1)},'＋')
             )
           )
-        ),
-        React.createElement('div',{className:'field-group',style:{marginBottom:16}},
-          React.createElement('label',{className:'field-label'},'Number of therapists'),
-          React.createElement('div',{className:'toggle-row'},[1,2,3,4,5,6,7,8].map(n=>React.createElement('button',{key:n,type:'button',className:'toggle-opt'+(groupTherapists===n?' active':''),onClick:()=>{setGroupTherapists(n);setConfirmed(false)}},String(n)+(n===1?' therapist':' therapists')))),
-          React.createElement('div',{className:'booking-breakdown-detail',style:{marginTop:8}},'Each additional therapist beyond the first adds R550. Final team size is subject to availability.')
         ),
         React.createElement('div',{className:'info-box group-booking-info',style:{marginBottom:10}},
           React.createElement('div',{className:'group-booking-note'},'3–8 guests. Children under 14 receive a 30-min Kiddies Massage (R300).'),
@@ -497,12 +492,17 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
             )
           );
         }),
+        React.createElement('div',{className:'field-group',style:{margin:'18px 0 12px'}},
+          React.createElement('label',{className:'field-label'},'Number of therapists'),
+          React.createElement('div',{className:'toggle-row'},[1,2,3,4,5,6,7,8].map(n=>React.createElement('button',{key:n,type:'button',className:'toggle-opt'+(groupTherapists===n?' active':''),onClick:()=>{setGroupTherapists(n);setConfirmed(false)}},String(n)+(n===1?' therapist':' therapists')))),
+          React.createElement('div',{className:'booking-breakdown-detail',style:{marginTop:8}},'Each additional therapist beyond the first adds R400. Estimated group duration adjusts to the selected team size. Final team size is subject to availability.')
+        ),
         React.createElement('div',{className:'price-row',style:{marginTop:8}},
           React.createElement('div',null,
             React.createElement('div',{className:'price-label'},'Combined booking total'),
             React.createElement('div',{className:'price-val'},'R '+groupTotal.toLocaleString())
           ),
-          groupStaffingFee>0&&React.createElement('div',{className:'booking-breakdown-item'},React.createElement('div',{className:'booking-breakdown-copy'},React.createElement('div',{className:'booking-breakdown-name'},'Additional therapist staffing'),React.createElement('div',{className:'booking-breakdown-detail'},(groupTherapists-1)+' additional therapist(s) × R550')),React.createElement('div',{className:'booking-breakdown-price'},'R '+groupStaffingFee.toLocaleString()))
+          groupStaffingFee>0&&React.createElement('div',{className:'booking-breakdown-item'},React.createElement('div',{className:'booking-breakdown-copy'},React.createElement('div',{className:'booking-breakdown-name'},'Additional therapist staffing'),React.createElement('div',{className:'booking-breakdown-detail'},(groupTherapists-1)+' additional therapist(s) × R400')),React.createElement('div',{className:'booking-breakdown-price'},'R '+groupStaffingFee.toLocaleString()))
         ),
       )
     ),
@@ -641,7 +641,9 @@ function S4Date({date,setDate,onNext,onBack}){
 
 function S5Time({time,setTime,items,onNext,onBack}){
   const itemDuration=it=>((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1))+it.addons.reduce((sum,a)=>sum+(ADDONS[a]?.duration||0),0);
-  const totalMins=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?Math.max(...items.map(itemDuration)):items.reduce((s,it)=>s+itemDuration(it),0);
+  const groupTherapistCount=cat==='group'?Math.max(1,...items.map(it=>it.groupTherapists||1)):1;
+  const workload=items.reduce((sum,it)=>sum+itemDuration(it),0);
+  const totalMins=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?Math.max(...items.map(itemDuration)):(cat==='group'?Math.ceil(workload/Math.max(1,groupTherapistCount)):workload);
   const surcharge=time?calcAH(time,totalMins):0;
   let endStr='';
   if(time){const[h,m]=time.split(':').map(Number);const e=h*60+m+totalMins;endStr=`${String(Math.floor((e%1440)/60)).padStart(2,'0')}:${String(e%60).padStart(2,'0')}`}
@@ -747,7 +749,7 @@ function S7Summary({intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,e
         ),
         React.createElement('div',{className:'summ-row-price'},'R '+simultaneousStaffingPremium.toLocaleString())
       ),
-      !isQuote&&cat==='group'&&groupStaffingFee>0&&React.createElement('div',{className:'summ-row'},React.createElement('div',null,React.createElement('div',{style:{fontSize:13,color:'var(--cream-dim)'}},'Additional therapist staffing'),React.createElement('div',{style:{fontSize:11,color:'var(--cream-dim)',marginTop:3}},'R550 per additional therapist')),React.createElement('div',{className:'summ-row-price'},'R '+groupStaffingFee.toLocaleString())),
+      !isQuote&&cat==='group'&&groupStaffingFee>0&&React.createElement('div',{className:'summ-row'},React.createElement('div',null,React.createElement('div',{style:{fontSize:13,color:'var(--cream-dim)'}},'Additional therapist staffing'),React.createElement('div',{style:{fontSize:11,color:'var(--cream-dim)',marginTop:3}},'R400 per additional therapist')),React.createElement('div',{className:'summ-row-price'},'R '+groupStaffingFee.toLocaleString())),
       !isQuote&&React.createElement('div',null,
         React.createElement('div',{className:'summ-row'},
           React.createElement('div',{style:{fontSize:13,color:'var(--cream-dim)'}},'Therapists Required'),
