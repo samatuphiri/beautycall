@@ -169,7 +169,7 @@ ${notes?notes+'\n\n':''}Would you please let me know if this works and if you ne
     step===1&&React.createElement(S2Category,{cat,setCat:selectCategory,onNext:next,onBack:back}),
     step===2&&React.createElement(S3Builder,{cat,items,setItems,group,setGroup,corp,setCorp,event,setEvent,onNext:next,onBack:back}),
     step===3&&React.createElement(S4Date,{date,setDate,onNext:next,onBack:back}),
-    step===4&&React.createElement(S5Time,{time,setTime,items,onNext:next,onBack:back}),
+    step===4&&React.createElement(S5Time,{time,setTime,items,cat,onNext:next,onBack:back}),
     step===5&&React.createElement(S6Address,{addr,setAddr,onNext:next,onBack:back}),
     step===6&&React.createElement(S7Summary,{intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,event,simultaneousStaffingPremium,groupStaffingFee,onNext:next,onBack:back}),
     step===7&&React.createElement(S8Checkout,{sendWA,onBack:back,final,cat})
@@ -639,7 +639,7 @@ function S4Date({date,setDate,onNext,onBack}){
   );
 }
 
-function S5Time({time,setTime,items,onNext,onBack}){
+function S5Time({time,setTime,items,cat,onNext,onBack}){
   const itemDuration=it=>((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1))+it.addons.reduce((sum,a)=>sum+(ADDONS[a]?.duration||0),0);
   const groupTherapistCount=cat==='group'?Math.max(1,...items.map(it=>it.groupTherapists||1)):1;
   const workload=items.reduce((sum,it)=>sum+itemDuration(it),0);
