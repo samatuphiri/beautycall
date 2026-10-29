@@ -501,7 +501,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
         React.createElement('div',{className:'booking-breakdown-copy'},
           React.createElement('div',{className:'booking-breakdown-name'},item.label+' · '+SERVICES[item.serviceId]?.name),
           React.createElement('div',{className:'booking-breakdown-detail'},item.duration+' minutes'+(item.addons.length?' · '+item.addons.map(a=>ADDONS[a]?.name).filter(Boolean).join(', '):'')+' · '+item.detail),
-          item.addons.length>0&&React.createElement('div',{className:'booking-breakdown-detail'},'Enhancements: '+item.addons.map(a=>ADDONS[a]?.name+' (+R'+ADDONS[a]?.price+')').join(', '))
+          item.addons.length>0&&React.createElement('div',{className:'booking-breakdown-detail'},'Enhancements: '+item.addons.map(a=>ADDONS[a]?.name+' (+'+(ADDONS[a]?.duration||0)+' min, +R'+ADDONS[a]?.price+')').join(', '))
         ),
         React.createElement('div',{className:'booking-breakdown-price'},'R '+item.price.toLocaleString())
       )),
