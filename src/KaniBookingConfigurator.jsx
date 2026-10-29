@@ -98,9 +98,9 @@ export default function KaniBookingConfigurator(){
 
   function sendWA(){
     const simultaneousIndividual=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous');
-    const therapists=simultaneousIndividual?items.reduce((sum,it)=>sum+(it.therapistCount||1),0):items.reduce((max,it)=>Math.max(max,it.therapistCount||1),0);
+    const therapists=cat==='group'?Math.max(1,...items.map(it=>it.groupTherapists||1)):(simultaneousIndividual?items.reduce((sum,it)=>sum+(it.therapistCount||1),0):items.reduce((max,it)=>Math.max(max,it.therapistCount||1),0));
     const arrangementDetails=items.some(it=>it.bookingArrangement)?'\nArrangement: '+(simultaneousIndividual?'Both guests treated at the same time':'Guests treated one after the other'):'';
-    const staffingPremiumDetails=simultaneousStaffingPremium?'\nAdditional staffing for simultaneous treatment: R'+simultaneousStaffingPremium:'';
+    const staffingPremiumDetails=(simultaneousStaffingPremium?'\nAdditional staffing for simultaneous treatment: R'+simultaneousStaffingPremium:'')+(cat==='group'&&groupStaffingFee>0?'\nAdditional therapist staffing: '+Math.max(0,therapists-1)+' × R400 = R'+groupStaffingFee.toLocaleString():'');
     const lines=items.map(it=>{
       const adds=it.addons.map(a=>ADDONS[a]).filter(Boolean);
       const addText=adds.map(a=>`${a.name} (+${a.duration} min)`);
@@ -706,12 +706,14 @@ function S6Address({addr,setAddr,onNext,onBack}){
 }
 function S7Summary({intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,event,simultaneousStaffingPremium,groupStaffingFee,onNext,onBack}){
   const itemDuration=it=>((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1))+it.addons.reduce((sum,a)=>sum+(ADDONS[a]?.duration||0),0);
-  const totalMins=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?Math.max(...items.map(itemDuration)):items.reduce((s,it)=>s+itemDuration(it),0);
+  const groupTherapistCount=cat==='group'?Math.max(1,...items.map(it=>it.groupTherapists||1)):1;
+  const workload=items.reduce((sum,it)=>sum+itemDuration(it),0);
+  const totalMins=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?Math.max(...items.map(itemDuration)):(cat==='group'?Math.ceil(workload/Math.max(1,groupTherapistCount)):workload);
   const endTime= time ? (()=>{const [h,m]=time.split(':').map(Number);const end=(h*60+m+totalMins)%1440;return `${String(Math.floor(end/60)).padStart(2,'0')}:${String(end%60).padStart(2,'0')}`})() : '';
   const isCorp=cat==='corporate';
   const isQuote=isCorp||cat==='events';
   const simultaneousIndividual=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous');
-  const therapists=simultaneousIndividual?items.reduce((sum,it)=>sum+(it.therapistCount||1),0):items.reduce((max,it)=>Math.max(max,it.therapistCount||1),0);
+  const therapists=cat==='group'?groupTherapistCount:(simultaneousIndividual?items.reduce((sum,it)=>sum+(it.therapistCount||1),0):items.reduce((max,it)=>Math.max(max,it.therapistCount||1),0));
   return React.createElement('div',{className:'fx'},
     React.createElement('div',{className:'step-eyebrow'},'Step 07'),
     React.createElement('div',{className:'step-title'},'Review your booking'),
