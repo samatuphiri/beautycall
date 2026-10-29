@@ -499,7 +499,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
       React.createElement('div',{className:'p-name'},'Therapists for your group'),
       React.createElement('div',{className:'field-label'},'Choose how many therapists will work across the group after reviewing each guest’s treatment.'),
       React.createElement('div',{className:'toggle-row',style:{flexWrap:'wrap'}},
-        Array.from({length:count},(_,i)=>i+1).map(n=>React.createElement('button',{key:n,type:'button',className:'toggle-opt'+((group.therapistCount||1)===n?' active':''),onClick:()=>setGroup(g=>({...g,therapistCount:n}))},n+(n===1?' therapist':' therapists'))
+        Array.from({length:count},(_,i)=>i+1).map(n=>React.createElement('button',{key:n,type:'button',className:'toggle-opt'+((group.therapistCount||1)===n?' active':''),onClick:()=>setGroup(g=>({...g,therapistCount:n}))},n+(n===1?' therapist':' therapists')))
       ),
       React.createElement('div',{className:'booking-breakdown-detail',style:{marginTop:8}},'Additional therapist fees and the estimated schedule will be calculated in the next update.')
     ),
