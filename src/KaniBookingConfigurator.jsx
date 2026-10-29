@@ -693,6 +693,7 @@ function S6Address({addr,setAddr,onNext,onBack}){
 function S7Summary({intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,event,simultaneousStaffingPremium,onNext,onBack}){
   const itemDuration=it=>((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1))+it.addons.reduce((sum,a)=>sum+(ADDONS[a]?.duration||0),0);
   const totalMins=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?Math.max(...items.map(itemDuration)):items.reduce((s,it)=>s+itemDuration(it),0);
+  const endTime= time ? (()=>{const [h,m]=time.split(':').map(Number);const end=(h*60+m+totalMins)%1440;return `${String(Math.floor(end/60)).padStart(2,'0')}:${String(end%60).padStart(2,'0')}`})() : '';
   const isCorp=cat==='corporate';
   const isQuote=isCorp||cat==='events';
   const simultaneousIndividual=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous');
@@ -741,7 +742,7 @@ function S7Summary({intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,e
         ),
         React.createElement('div',{className:'summ-row'},
           React.createElement('div',{style:{fontSize:13,color:'var(--cream-dim)'}},'Estimated Treatment Time'),
-          React.createElement('div',{style:{fontSize:13,color:'var(--cream)'}},totalMins+' min')
+          React.createElement('div',{style:{fontSize:13,color:'var(--cream)'}},totalMins+' min ('+time+'–'+endTime+')')
         ),
         React.createElement('div',{className:'summ-row'},
           React.createElement('div',{style:{fontSize:13,color:'var(--cream-dim)'}},'Base Total'),
