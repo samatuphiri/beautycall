@@ -79,7 +79,7 @@ export default function KaniBookingConfigurator(){
   const[date,setDate]=useState(null);
   const[time,setTime]=useState(null);
   const[addr,setAddr]=useState({name:'',street:'',suburb:'',notes:'',additionalNotes:''});
-  const[group,setGroup]=useState({adults:3,children:0,eventType:''});
+  const[group,setGroup]=useState({adults:3,children:0,eventType:'',therapistCount:1});
   const[corp,setCorp]=useState({company:'',contact:'',attendees:2,eventType:'',location:''});
   const[event,setEvent]=useState({contact:'',attendees:3,eventType:'',location:'',notes:''});
   const N=8;
@@ -358,7 +358,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
       setItems([{id:uuid(),serviceId:'couples',duration:couplesDuration,addons:[],price:calcPrice('couples',couplesDuration,[],true),therapistCount:2,label:'Couples Massage — simultaneous'}]);
     }else{
       const arrangement=!isGroup&&guestCount===2?individualArrangement:null;
-      setItems(parts.map(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);return {id:uuid(),serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:sid==='royalty'?2:1,bookingArrangement:arrangement,guestName:pName[p.key]?.trim()||'',label:(pName[p.key]?.trim()||p.type+' '+p.num)+(arrangement?' — '+(arrangement==='simultaneous'?'simultaneous individual treatment':'sequential individual treatment'):'')}}));
+      setItems(parts.map(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);return {id:uuid(),serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:sid==='royalty'?2:1,groupTherapistCount:isGroup?(group.therapistCount||1):undefined,bookingArrangement:arrangement,guestName:pName[p.key]?.trim()||'',label:(pName[p.key]?.trim()||p.type+' '+p.num)+(arrangement?' — '+(arrangement==='simultaneous'?'simultaneous individual treatment':'sequential individual treatment'):'')}}));
     }
     setConfirmed(true);
     onNext();
@@ -494,6 +494,14 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
           ),
         ),
       )
+    ),
+    isGroup&&React.createElement('div',{className:'p-card group-therapist-selector',style:{marginTop:18}},
+      React.createElement('div',{className:'p-name'},'Therapists for your group'),
+      React.createElement('div',{className:'field-label'},'Choose how many therapists will work across the group after reviewing each guest’s treatment.'),
+      React.createElement('div',{className:'toggle-row',style:{flexWrap:'wrap'}},
+        Array.from({length:count},(_,i)=>i+1).map(n=>React.createElement('button',{key:n,type:'button',className:'toggle-opt'+((group.therapistCount||1)===n?' active':''),onClick:()=>setGroup(g=>({...g,therapistCount:n}))},n+(n===1?' therapist':' therapists'))
+      ),
+      React.createElement('div',{className:'booking-breakdown-detail',style:{marginTop:8}},'Additional therapist fees and the estimated schedule will be calculated in the next update.')
     ),
     React.createElement('div',{className:'booking-breakdown'},
       React.createElement('div',{className:'booking-breakdown-heading'},'Your treatment breakdown'),
