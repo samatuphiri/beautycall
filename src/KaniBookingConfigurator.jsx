@@ -705,7 +705,7 @@ function S7Summary({intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,e
   const isCorp=cat==='corporate';
   const isQuote=isCorp||cat==='events';
   const simultaneousIndividual=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous');
-  const therapists=simultaneousIndividual?items.reduce((sum,it)=>sum+(it.therapistCount||1),0):items.reduce((max,it)=>Math.max(max,it.therapistCount||1),0);
+  const therapists=simultaneousIndividual?items.reduce((sum,it)=>sum+(it.therapistCount||1),0):items.reduce((max,it)=>Math.max(max,it.groupTherapistCount||it.therapistCount||1),0);
   return React.createElement('div',{className:'fx'},
     React.createElement('div',{className:'step-eyebrow'},'Step 07'),
     React.createElement('div',{className:'step-title'},'Review your booking'),
