@@ -633,7 +633,7 @@ function S5Time({time,setTime,items,onNext,onBack}){
   const totalMins=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?Math.max(...items.map(itemDuration)):items.reduce((s,it)=>s+itemDuration(it),0);
   const surcharge=time?calcAH(time,totalMins):0;
   let endStr='';
-  if(time){const[h,m]=time.split(':').map(Number);const e=h*60+m+totalMins;endStr=`${String(Math.floor(e/60)).padStart(2,'0')}:${String(e%60).padStart(2,'0')}`}
+  if(time){const[h,m]=time.split(':').map(Number);const e=h*60+m+totalMins;endStr=`${String(Math.floor((e%1440)/60)).padStart(2,'0')}:${String(e%60).padStart(2,'0')}`}
   return React.createElement('div',{className:'fx'},
     React.createElement('div',{className:'step-eyebrow'},'Step 05'),
     React.createElement('div',{className:'step-title'},'Choose your preferred time'),
