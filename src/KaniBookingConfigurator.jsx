@@ -91,7 +91,7 @@ export default function KaniBookingConfigurator(){
   const final=baseTotal+ahFee;
   const next=()=>setStep(s=>Math.min(s+1,N-1));
   const back=()=>setStep(s=>Math.max(s-1,0));
-  const selectCategory=id=>{setCat(id);setItems([])};
+  const selectCategory=id=>{if(id!==cat)setItems([]);setCat(id)};
 
   function sendWA(){
     const simultaneousIndividual=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous');
@@ -317,17 +317,17 @@ function S3Builder({cat,items,setItems,group,setGroup,corp,setCorp,event,setEven
 
 function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
   const isGroup=mode==='group';
-  const[guestCount,setGuestCount]=useState(1);
-  const[pSvc,setPSvc]=useState({});
-  const[pDur,setPDur]=useState({});
-  const[pAdd,setPAdd]=useState({});
-  const[pName,setPName]=useState({});
+  const[guestCount,setGuestCount]=useState(()=>isGroup?1:items[0]?.serviceId==='couples'?2:Math.max(1,items.length));
+  const[pSvc,setPSvc]=useState(()=>Object.fromEntries(items.map((item,index)=>[isGroup?(index<group.adults?'a'+index:'c'+(index-group.adults)):'g'+index,item.serviceId])));
+  const[pDur,setPDur]=useState(()=>Object.fromEntries(items.map((item,index)=>[isGroup?(index<group.adults?'a'+index:'c'+(index-group.adults)):'g'+index,Number(item.duration)])));
+  const[pAdd,setPAdd]=useState(()=>Object.fromEntries(items.map((item,index)=>[isGroup?(index<group.adults?'a'+index:'c'+(index-group.adults)):'g'+index,item.addons||[]])));
+  const[pName,setPName]=useState(()=>Object.fromEntries(items.map((item,index)=>[isGroup?(index<group.adults?'a'+index:'c'+(index-group.adults)):'g'+index,item.guestName||''])));
   const[openCards,setOpenCards]=useState({g0:true,a0:true});
   const[confirmed,setConfirmed]=useState(false);
-  const[couplesPackage,setCouplesPackage]=useState(false);
+  const[couplesPackage,setCouplesPackage]=useState(()=>!isGroup&&items.some(item=>item.serviceId==='couples'));
   const[couplesTherapists,setCouplesTherapists]=useState(2);
-  const[couplesDuration,setCouplesDuration]=useState(90);
-  const[individualArrangement,setIndividualArrangement]=useState('sequential');
+  const[couplesDuration,setCouplesDuration]=useState(()=>items.find(item=>item.serviceId==='couples')?.duration||90);
+  const[individualArrangement,setIndividualArrangement]=useState(()=>items.find(item=>item.bookingArrangement)?.bookingArrangement||'sequential');
   const count=isGroup?group.adults+group.children:guestCount;
   const parts=useMemo(()=>Array.from({length:count},(_,i)=>({type:isGroup?(i<group.adults?'Adult':'Child'):'Guest',num:isGroup?(i<group.adults?i+1:i-group.adults+1):i+1,key:isGroup?(i<group.adults?'a'+i:'c'+(i-group.adults)):'g'+i})),[count,isGroup,group.adults,group.children,guestCount]);
   const isChild=k=>isGroup&&k.startsWith('c');
@@ -358,7 +358,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
       setItems([{id:uuid(),serviceId:'couples',duration:couplesDuration,addons:[],price:calcPrice('couples',couplesDuration,[],true),therapistCount:2,label:'Couples Massage — simultaneous'}]);
     }else{
       const arrangement=!isGroup&&guestCount===2?individualArrangement:null;
-      setItems(parts.map(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);return {id:uuid(),serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:sid==='royalty'?2:1,bookingArrangement:arrangement,label:(pName[p.key]?.trim()||p.type+' '+p.num)+(arrangement?' — '+(arrangement==='simultaneous'?'simultaneous individual treatment':'sequential individual treatment'):'')}}));
+      setItems(parts.map(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);return {id:uuid(),serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:sid==='royalty'?2:1,bookingArrangement:arrangement,guestName:pName[p.key]?.trim()||'',label:(pName[p.key]?.trim()||p.type+' '+p.num)+(arrangement?' — '+(arrangement==='simultaneous'?'simultaneous individual treatment':'sequential individual treatment'):'')}}));
     }
     setConfirmed(true);
     onNext();
