@@ -635,3 +635,60 @@
   .kani-booking-root .booking-breakdown{padding:10px}
   .kani-booking-root .premium-service-card{padding:12px}
 }
+
+/* Collapsible per-guest treatment cards */
+.kani-booking-root .compact-guest-card{padding:0;overflow:hidden;transition:border-color .2s,background .2s}
+.kani-booking-root .compact-guest-card.is-open{border-color:rgba(212,165,162,.32);background:rgba(255,255,255,.045)}
+.kani-booking-root .guest-card-toggle{display:flex;align-items:center;gap:12px;width:100%;min-width:0;padding:15px 16px;border:0;background:transparent;color:var(--cream);text-align:left;cursor:pointer;font:inherit}
+.kani-booking-root .guest-card-toggle:hover{background:rgba(255,255,255,.025)}
+.kani-booking-root .guest-card-toggle:focus-visible{outline:2px solid var(--blush);outline-offset:-3px;border-radius:12px}
+.kani-booking-root .guest-card-main{display:flex;flex:1;flex-direction:column;gap:4px;min-width:0}
+.kani-booking-root .guest-card-name{font-family:var(--serif);font-size:18px;line-height:1.2;color:var(--cream);overflow-wrap:anywhere}
+.kani-booking-root .guest-card-summary{font-family:var(--sans);font-size:11px;line-height:1.45;color:var(--cream-dim);overflow-wrap:anywhere}
+.kani-booking-root .guest-card-price{flex:0 0 auto;color:var(--blush-light);font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kani-booking-root .guest-card-chevron{display:flex;flex:0 0 25px;align-items:center;justify-content:center;width:25px;height:25px;border:1px solid var(--navy-border2);border-radius:50%;color:var(--blush);font-size:17px;line-height:1}
+.kani-booking-root .guest-card-content{padding:2px 16px 18px;border-top:1px solid var(--navy-border);animation:guest-card-reveal .18s ease-out both}
+.kani-booking-root .guest-card-content>.field-label:first-child{margin-top:15px}
+.kani-booking-root .guest-card-content .guest-name-input{margin-bottom:16px}
+.kani-booking-root .guest-card-content .treatment-select{margin-bottom:18px}
+.kani-booking-root .guest-card-content .dur-btn{min-width:76px}
+.kani-booking-root .guest-card-content .pills-wrap{gap:7px}
+.kani-booking-root .guest-card-content .pill{padding:7px 12px}
+@keyframes guest-card-reveal{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:600px){
+  .kani-booking-root .guest-card-toggle{gap:8px;padding:13px 12px}
+  .kani-booking-root .guest-card-name{font-size:17px}
+  .kani-booking-root .guest-card-summary{font-size:10px}
+  .kani-booking-root .guest-card-price{font-size:12px}
+  .kani-booking-root .guest-card-chevron{flex-basis:23px;width:23px;height:23px}
+  .kani-booking-root .guest-card-content{padding:0 12px 14px}
+  .kani-booking-root .guest-card-content .dur-btn{min-width:68px}
+}
+@media(prefers-reduced-motion:reduce){
+  .kani-booking-root .compact-guest-card,.kani-booking-root .guest-card-content{animation:none;transition:none}
+}
+
+/* Compact guest name field: blank placeholder and less vertical space */
+.kani-booking-root .guest-card-content>.field-label:first-child{margin-top:8px;margin-bottom:3px}
+.kani-booking-root .guest-card-content .guest-name-input{height:34px;min-height:34px;padding:6px 10px;font-size:12px;margin-bottom:8px}
+.kani-booking-root .guest-card-content .treatment-select{margin-bottom:12px}
+@media(max-width:600px){
+  .kani-booking-root .guest-card-content>.field-label:first-child{margin-top:6px;margin-bottom:2px}
+  .kani-booking-root .guest-card-content .guest-name-input{height:32px;min-height:32px;padding:5px 9px;font-size:12px;margin-bottom:7px}
+  .kani-booking-root .guest-card-content .treatment-select{margin-bottom:10px}
+}
+
+/* Compact group-booking information beneath guest counters */
+.kani-booking-root .group-booking-info{padding:10px 12px;text-align:left;border-radius:9px;margin-bottom:10px}
+.kani-booking-root .group-booking-note{font-size:11px;line-height:1.4;color:var(--cream-dim)}
+.kani-booking-root .group-booking-links{display:flex;flex-wrap:wrap;gap:3px 14px;margin-top:5px}
+.kani-booking-root .group-booking-links .concierge-link{font-size:11px;line-height:1.4}
+@media(max-width:600px){
+  .kani-booking-root .group-booking-info{padding:8px 10px}
+  .kani-booking-root .group-booking-note,.kani-booking-root .group-booking-links .concierge-link{font-size:10px}
+  .kani-booking-root .group-booking-links{gap:3px 10px;margin-top:4px}
+}
+
+/* Let custom dropdown menus extend beyond collapsible guest cards */
+.kani-booking-root .compact-guest-card:has(.custom-select-menu){overflow:visible;position:relative;z-index:40}
+.kani-booking-root .compact-guest-card:has(.custom-select-menu) .custom-select-wrap{z-index:60}
