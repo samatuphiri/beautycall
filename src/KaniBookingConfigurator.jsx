@@ -85,9 +85,9 @@ export default function KaniBookingConfigurator(){
   const[event,setEvent]=useState({contact:'',attendees:3,eventType:'',location:'',notes:''});
   const N=8;
   const itemDuration=it=>((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1))+it.addons.reduce((sum,a)=>sum+(ADDONS[a]?.duration||0),0);
+  const groupTherapistCount=cat==='group'?Math.max(1,...items.map(it=>it.groupTherapists||1)):1;
   const totalMins=useMemo(()=>{if(items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous'))return Math.max(...items.map(itemDuration));const workload=items.reduce((sum,it)=>sum+itemDuration(it),0);return cat==='group'?Math.ceil(workload/Math.max(1,groupTherapistCount)):workload},[items,cat,groupTherapistCount]);
   const simultaneousStaffingPremium=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?300:0;
-  const groupTherapistCount=cat==='group'?Math.max(1,...items.map(it=>it.groupTherapists||1)):1;
   const groupStaffingFee=cat==='group'?Math.max(0,groupTherapistCount-1)*ADDITIONAL_THERAPIST_FEE:0;
   const baseTotal=useMemo(()=>items.reduce((s,it)=>s+it.price,0)+simultaneousStaffingPremium+groupStaffingFee,[items,simultaneousStaffingPremium,groupStaffingFee]);
   const ahFee=useMemo(()=>time?calcAH(time,totalMins):0,[time,totalMins]);
