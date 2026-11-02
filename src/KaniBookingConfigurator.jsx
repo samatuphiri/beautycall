@@ -401,7 +401,15 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
       if(currentTotal+delta<3||currentTotal+delta>8)return g;
       const adults=type==='Adult'?Math.max(0,Math.min(8-g.children,g.adults+delta)):g.adults;
       const children=type==='Child'?Math.max(0,Math.min(8-g.adults,g.children+delta)):g.children;
-      return {...g,adults,children};
+      const nextTotal=adults+children;
+      const nextParts=Array.from({length:nextTotal},(_,i)=>{
+        const key=i<adults?'a'+i:'c'+(i-adults);
+        return {key,serviceId:key.startsWith('c')?'kiddies':pSvc[key]||'swedish'};
+      });
+      const bounds=getGroupTherapistBounds(nextParts);
+      let therapistCount=Math.max(bounds.min,Math.min(bounds.max,Number(g.therapistCount)||bounds.min));
+      if(bounds.allRoyalty&&therapistCount%2)therapistCount=Math.max(2,therapistCount-1);
+      return {...g,adults,children,therapistCount};
     });
   }
   function confirm(){
