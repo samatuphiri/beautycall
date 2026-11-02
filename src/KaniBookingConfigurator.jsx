@@ -62,7 +62,7 @@ function calcPrice(sid,dur,addons,simul){
 }
 function fmtDate(d){if(!d)return'';return`${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`}
 
-export default function getItemDuration(it){
+function getItemDuration(it){
   return ((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1))+it.addons.reduce((sum,a)=>sum+(ADDONS[a]?.duration||0),0);
 }
 function calculateTreatmentDuration(items){
@@ -70,7 +70,7 @@ function calculateTreatmentDuration(items){
   return items.reduce((sum,it)=>sum+getItemDuration(it),0);
 }
 
-function KaniBookingConfigurator(){
+export default function KaniBookingConfigurator(){
   const[step,setStep]=useState(0);
   const bookingRootRef=useRef(null);
   const previousStepRef=useRef(0);
