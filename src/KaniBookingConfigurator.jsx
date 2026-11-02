@@ -62,7 +62,15 @@ function calcPrice(sid,dur,addons,simul){
 }
 function fmtDate(d){if(!d)return'';return`${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`}
 
-export default function KaniBookingConfigurator(){
+export default function getItemDuration(it){
+  return ((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1))+it.addons.reduce((sum,a)=>sum+(ADDONS[a]?.duration||0),0);
+}
+function calculateTreatmentDuration(items){
+  if(items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous'))return Math.max(...items.map(getItemDuration));
+  return items.reduce((sum,it)=>sum+getItemDuration(it),0);
+}
+
+function KaniBookingConfigurator(){
   const[step,setStep]=useState(0);
   const bookingRootRef=useRef(null);
   const previousStepRef=useRef(0);
@@ -83,8 +91,7 @@ export default function KaniBookingConfigurator(){
   const[corp,setCorp]=useState({company:'',contact:'',attendees:2,eventType:'',location:''});
   const[event,setEvent]=useState({contact:'',attendees:3,eventType:'',location:'',notes:''});
   const N=8;
-  const itemDuration=it=>((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1))+it.addons.reduce((sum,a)=>sum+(ADDONS[a]?.duration||0),0);
-  const totalMins=useMemo(()=>{if(items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous'))return Math.max(...items.map(itemDuration));return items.reduce((s,it)=>s+itemDuration(it),0)},[items]);
+  const totalMins=useMemo(()=>calculateTreatmentDuration(items),[items]);
   const simultaneousStaffingPremium=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?300:0;
   const baseTotal=useMemo(()=>items.reduce((s,it)=>s+it.price,0)+simultaneousStaffingPremium,[items,simultaneousStaffingPremium]);
   const ahFee=useMemo(()=>time?calcAH(time,totalMins):0,[time,totalMins]);
@@ -637,8 +644,7 @@ function S4Date({date,setDate,onNext,onBack}){
 }
 
 function S5Time({time,setTime,items,onNext,onBack}){
-  const itemDuration=it=>((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1))+it.addons.reduce((sum,a)=>sum+(ADDONS[a]?.duration||0),0);
-  const totalMins=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?Math.max(...items.map(itemDuration)):items.reduce((s,it)=>s+itemDuration(it),0);
+  const totalMins=calculateTreatmentDuration(items);
   const surcharge=time?calcAH(time,totalMins):0;
   let endStr='';
   if(time){const[h,m]=time.split(':').map(Number);const e=h*60+m+totalMins;endStr=`${String(Math.floor((e%1440)/60)).padStart(2,'0')}:${String(e%60).padStart(2,'0')}`}
