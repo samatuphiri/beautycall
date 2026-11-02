@@ -112,8 +112,7 @@ export default function KaniBookingConfigurator(){
   const[event,setEvent]=useState({contact:'',attendees:3,eventType:'',location:'',notes:''});
   const N=8;
   const totalMins=useMemo(()=>calculateTreatmentDuration(items),[items]);
-  const simultaneousRoyaltyCount=items.filter(it=>it.serviceId==='royalty').length;
-   const simultaneousStaffingPremium=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?400*Math.max(1,simultaneousRoyaltyCount):0;
+  const simultaneousStaffingPremium=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?400:0;
   const baseTotal=useMemo(()=>items.reduce((s,it)=>s+it.price,0)+simultaneousStaffingPremium,[items,simultaneousStaffingPremium]);
   const isGroupBooking=items.length>0&&items.every(it=>it.groupTherapistCount!==undefined);
   const requestedGroupTherapists=isGroupBooking?Math.max(1,...items.map(it=>Number(it.groupTherapistCount)||1)):0;
@@ -375,8 +374,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
     const remaining=faceHead.includes(id)?current.filter(a=>!faceHead.includes(a)):current;
     return {...p,[k]:[...remaining,id]};
   });
-  const simultaneousRoyaltyCount=parts.filter(p=>!isChild(p.key)&&getSvc(p.key)==='royalty').length;
-   const simultaneousStaffingPremium=!isGroup&&guestCount===2&&individualArrangement==='simultaneous'?400*Math.max(1,simultaneousRoyaltyCount):0;
+  const simultaneousStaffingPremium=!isGroup&&guestCount===2&&individualArrangement==='simultaneous'?400:0;
   const groupHasRoyalty=isGroup&&parts.some(p=>!isChild(p.key)&&getSvc(p.key)==='royalty');
   const groupIncludedTherapists=groupHasRoyalty?2:1;
   const groupTherapistFee=isGroup?Math.max(0,(group.therapistCount||1)-groupIncludedTherapists)*400:0;
@@ -562,7 +560,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
         React.createElement('div',{className:'booking-breakdown-price'},'R '+groupTherapistFee.toLocaleString())
       ),
       !isGroup&&guestCount===2&&couplesPackage===false&&individualArrangement==='simultaneous'&&React.createElement('div',{className:'booking-breakdown-item'},
-        React.createElement('div',{className:'booking-breakdown-copy'},React.createElement('div',{className:'booking-breakdown-name'},'Simultaneous Staffing Premium'),React.createElement('div',{className:'booking-breakdown-detail'},'R400 per simultaneous booking, multiplied for each Royalty treatment')),
+        React.createElement('div',{className:'booking-breakdown-copy'},React.createElement('div',{className:'booking-breakdown-name'},'Simultaneous Staffing Premium'),React.createElement('div',{className:'booking-breakdown-detail'},'A flat R400 premium for both guests being treated simultaneously')),
         React.createElement('div',{className:'booking-breakdown-price'},'R '+simultaneousStaffingPremium.toLocaleString())
       ),
       React.createElement('div',{className:'booking-breakdown-total'},
