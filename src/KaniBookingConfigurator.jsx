@@ -88,8 +88,9 @@ function calculateTreatmentDuration(items){
     const workloads=Array(therapistCount).fill(0);
     const tasks=items.map(it=>({
       duration:getItemDuration(it),
-      staff:Math.min(therapistCount,Math.max(1,Number(it.therapistCount)||1))
-    })).sort((a,b)=>b.duration-a.duration);
+      staff:Math.min(therapistCount,Math.max(1,Number(it.therapistCount)||1)),
+      isRoyalty:it.serviceId==='royalty'
+    })).sort((a,b)=>Number(b.isRoyalty)-Number(a.isRoyalty)||b.duration-a.duration);
 
     tasks.forEach(task=>{
       const available=workloads.map((load,index)=>({load,index})).sort((a,b)=>a.load-b.load).slice(0,task.staff);
