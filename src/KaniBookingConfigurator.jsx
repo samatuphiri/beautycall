@@ -67,6 +67,26 @@ function getItemDuration(it){
 }
 function calculateTreatmentDuration(items){
   if(items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous'))return Math.max(...items.map(getItemDuration));
+
+  // Group bookings: estimate parallel therapist workloads using a simple
+  // longest-treatment-first allocation. Royalty treatments occupy two
+  // therapist slots when two or more therapists have been selected.
+  const isGroupBooking=items.length>0&&items.every(it=>it.groupTherapistCount!==undefined);
+  if(isGroupBooking){
+    const therapistCount=Math.max(1,...items.map(it=>Number(it.groupTherapistCount)||1));
+    const workloads=Array(therapistCount).fill(0);
+    const tasks=items.map(it=>({
+      duration:getItemDuration(it),
+      staff:Math.min(therapistCount,Math.max(1,Number(it.therapistCount)||1))
+    })).sort((a,b)=>b.duration-a.duration);
+
+    tasks.forEach(task=>{
+      const available=workloads.map((load,index)=>({load,index})).sort((a,b)=>a.load-b.load).slice(0,task.staff);
+      available.forEach(slot=>{workloads[slot.index]+=task.duration});
+    });
+    return Math.max(...workloads);
+  }
+
   return items.reduce((sum,it)=>sum+getItemDuration(it),0);
 }
 
@@ -705,8 +725,7 @@ function S6Address({addr,setAddr,onNext,onBack}){
   );
 }
 function S7Summary({intent,cat,date,time,addr,items,baseTotal,ahFee,final,corp,event,simultaneousStaffingPremium,onNext,onBack}){
-  const itemDuration=it=>((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1))+it.addons.reduce((sum,a)=>sum+(ADDONS[a]?.duration||0),0);
-  const totalMins=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?Math.max(...items.map(itemDuration)):items.reduce((s,it)=>s+itemDuration(it),0);
+  const totalMins=calculateTreatmentDuration(items);
   const endTime= time ? (()=>{const [h,m]=time.split(':').map(Number);const end=(h*60+m+totalMins)%1440;return `${String(Math.floor(end/60)).padStart(2,'0')}:${String(end%60).padStart(2,'0')}`})() : '';
   const isCorp=cat==='corporate';
   const isQuote=isCorp||cat==='events';
