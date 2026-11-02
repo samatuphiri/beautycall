@@ -375,7 +375,11 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
     return {...p,[k]:[...remaining,id]};
   });
   const simultaneousStaffingPremium=!isGroup&&guestCount===2&&individualArrangement==='simultaneous'?300:0;
-  const groupTotal=!isGroup&&guestCount===2&&couplesPackage?calcPrice('couples',couplesDuration,[],true):parts.reduce((sum,p)=>sum+calcPrice(getSvc(p.key),getDur(p.key),getAdd(p.key),false),0)+simultaneousStaffingPremium;
+  const groupHasRoyalty=isGroup&&parts.some(p=>!isChild(p.key)&&getSvc(p.key)==='royalty');
+  const groupIncludedTherapists=groupHasRoyalty?2:1;
+  const groupTherapistFee=isGroup?Math.max(0,(group.therapistCount||1)-groupIncludedTherapists)*400:0;
+  const groupTreatmentSubtotal=!isGroup&&guestCount===2&&couplesPackage?calcPrice('couples',couplesDuration,[],true):parts.reduce((sum,p)=>sum+calcPrice(getSvc(p.key),getDur(p.key),getAdd(p.key),false),0)+simultaneousStaffingPremium;
+  const groupTotal=groupTreatmentSubtotal+groupTherapistFee;
   function updateCount(type,delta){
     setConfirmed(false);
     if(!isGroup){setGuestCount(n=>Math.max(1,Math.min(2,n+delta)));return;}
@@ -548,6 +552,13 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
         ),
         React.createElement('div',{className:'booking-breakdown-price'},'R '+item.price.toLocaleString())
       )),
+      isGroup&&groupTherapistFee>0&&React.createElement('div',{className:'booking-breakdown-item'},
+        React.createElement('div',{className:'booking-breakdown-copy'},
+          React.createElement('div',{className:'booking-breakdown-name'},'Additional Therapist Fee'),
+          React.createElement('div',{className:'booking-breakdown-detail'},(group.therapistCount||1)+' therapists selected · '+groupIncludedTherapists+' included')
+        ),
+        React.createElement('div',{className:'booking-breakdown-price'},'R '+groupTherapistFee.toLocaleString())
+      ),
       !isGroup&&guestCount===2&&couplesPackage===false&&individualArrangement==='simultaneous'&&React.createElement('div',{className:'booking-breakdown-item'},
         React.createElement('div',{className:'booking-breakdown-copy'},React.createElement('div',{className:'booking-breakdown-name'},'Simultaneous Staffing Premium'),React.createElement('div',{className:'booking-breakdown-detail'},'Additional therapist staffing for both guests')),
         React.createElement('div',{className:'booking-breakdown-price'},'R 300')
