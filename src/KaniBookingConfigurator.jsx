@@ -571,7 +571,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
     ),
     React.createElement('div',{className:'nav-row'},
       React.createElement('button',{className:'btn-ghost',onClick:onBack},'← Back'),
-      isGroup&&React.createElement('button',{className:'btn-primary',disabled:(isGroup?count<3:count<1)||count>8,onClick:confirm,style:{flex:1}},'Continue to Date & Time')
+      React.createElement('button',{className:'btn-primary',disabled:(isGroup?count<3:count<1)||count>8,onClick:confirm,style:{flex:1}},'Continue to Date & Time')
     )
   );
 }
