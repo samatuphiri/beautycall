@@ -388,7 +388,9 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
       if(currentTotal+delta<3||currentTotal+delta>8)return g;
       const adults=type==='Adult'?Math.max(0,Math.min(8-g.children,g.adults+delta)):g.adults;
       const children=type==='Child'?Math.max(0,Math.min(8-g.adults,g.children+delta)):g.children;
-      return {...g,adults,children};
+      const nextTotal=adults+children;
+      const therapistCount=Math.min(g.therapistCount||1,nextTotal);
+      return {...g,adults,children,therapistCount};
     });
   }
   function confirm(){
