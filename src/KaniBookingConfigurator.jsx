@@ -380,6 +380,8 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
     setConfirmed(false);
     if(!isGroup){setGuestCount(n=>Math.max(1,Math.min(2,n+delta)));return;}
     setGroup(g=>{
+      const currentTotal=g.adults+g.children;
+      if(currentTotal+delta<3||currentTotal+delta>8)return g;
       const adults=type==='Adult'?Math.max(0,Math.min(8-g.children,g.adults+delta)):g.adults;
       const children=type==='Child'?Math.max(0,Math.min(8-g.adults,g.children+delta)):g.children;
       return {...g,adults,children};
@@ -428,7 +430,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
           React.createElement('div',null,
             React.createElement('span',{className:'field-label'},'Adults'),
             React.createElement('div',{className:'stepper'},
-              React.createElement('button',{className:'stp-btn',disabled:group.adults<=0,onClick:()=>updateCount('Adult',-1)},'−'),
+              React.createElement('button',{className:'stp-btn',disabled:group.adults<=0||count<=3,onClick:()=>updateCount('Adult',-1)},'−'),
               React.createElement('div',{className:'stp-val'},group.adults),
               React.createElement('button',{className:'stp-btn',disabled:count>=8,onClick:()=>updateCount('Adult',1)},'＋')
             )
@@ -436,7 +438,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
           React.createElement('div',null,
             React.createElement('span',{className:'field-label'},'Children under 14'),
             React.createElement('div',{className:'stepper'},
-              React.createElement('button',{className:'stp-btn',disabled:group.children<=0,onClick:()=>updateCount('Child',-1)},'−'),
+              React.createElement('button',{className:'stp-btn',disabled:group.children<=0||count<=3,onClick:()=>updateCount('Child',-1)},'−'),
               React.createElement('div',{className:'stp-val'},group.children),
               React.createElement('button',{className:'stp-btn',disabled:count>=8,onClick:()=>updateCount('Child',1)},'＋')
             )
