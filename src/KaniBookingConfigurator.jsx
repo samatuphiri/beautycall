@@ -534,7 +534,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
       React.createElement('div',{className:'toggle-row',style:{flexWrap:'wrap'}},
         Array.from({length:count},(_,i)=>i+1).map(n=>React.createElement('button',{key:n,type:'button',className:'toggle-opt'+((group.therapistCount||1)===n?' active':''),onClick:()=>setGroup(g=>({...g,therapistCount:n}))},n+(n===1?' therapist':' therapists')))
       ),
-      React.createElement('div',{className:'booking-breakdown-detail',style:{marginTop:8}},'Additional therapist fees and the estimated schedule will be calculated in the next update.')
+      React.createElement('div',{className:'booking-breakdown-detail',style:{marginTop:10}},(()=>{const royaltySelected=parts.some(p=>!isChild(p.key)&&getSvc(p.key)==='royalty');const includedTherapists=royaltySelected?2:1;const fee=Math.max(0,(group.therapistCount||1)-includedTherapists)*400;return fee>0?'Additional therapist fee: R '+fee.toLocaleString()+' ('+(group.therapistCount||1)+' selected, '+includedTherapists+' included)':'No additional therapist fee.'})())
     ),
     React.createElement('div',{className:'booking-breakdown'},
       React.createElement('div',{className:'booking-breakdown-heading'},'Your treatment breakdown'),
