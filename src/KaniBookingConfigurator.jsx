@@ -112,7 +112,7 @@ export default function KaniBookingConfigurator(){
   const[event,setEvent]=useState({contact:'',attendees:3,eventType:'',location:'',notes:''});
   const N=8;
   const totalMins=useMemo(()=>calculateTreatmentDuration(items),[items]);
-  const simultaneousStaffingPremium=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?300:0;
+  const simultaneousStaffingPremium=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?400:0;
   const baseTotal=useMemo(()=>items.reduce((s,it)=>s+it.price,0)+simultaneousStaffingPremium,[items,simultaneousStaffingPremium]);
   const isGroupBooking=items.length>0&&items.every(it=>it.groupTherapistCount!==undefined);
   const requestedGroupTherapists=isGroupBooking?Math.max(1,...items.map(it=>Number(it.groupTherapistCount)||1)):0;
@@ -374,7 +374,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
     const remaining=faceHead.includes(id)?current.filter(a=>!faceHead.includes(a)):current;
     return {...p,[k]:[...remaining,id]};
   });
-  const simultaneousStaffingPremium=!isGroup&&guestCount===2&&individualArrangement==='simultaneous'?300:0;
+  const simultaneousStaffingPremium=!isGroup&&guestCount===2&&individualArrangement==='simultaneous'?400:0;
   const groupHasRoyalty=isGroup&&parts.some(p=>!isChild(p.key)&&getSvc(p.key)==='royalty');
   const groupIncludedTherapists=groupHasRoyalty?2:1;
   const groupTherapistFee=isGroup?Math.max(0,(group.therapistCount||1)-groupIncludedTherapists)*400:0;
@@ -560,8 +560,8 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
         React.createElement('div',{className:'booking-breakdown-price'},'R '+groupTherapistFee.toLocaleString())
       ),
       !isGroup&&guestCount===2&&couplesPackage===false&&individualArrangement==='simultaneous'&&React.createElement('div',{className:'booking-breakdown-item'},
-        React.createElement('div',{className:'booking-breakdown-copy'},React.createElement('div',{className:'booking-breakdown-name'},'Simultaneous Staffing Premium'),React.createElement('div',{className:'booking-breakdown-detail'},'Additional therapist staffing for both guests')),
-        React.createElement('div',{className:'booking-breakdown-price'},'R 300')
+        React.createElement('div',{className:'booking-breakdown-copy'},React.createElement('div',{className:'booking-breakdown-name'},'Simultaneous Staffing Premium'),React.createElement('div',{className:'booking-breakdown-detail'},'A flat R400 premium for both guests being treated simultaneously')),
+        React.createElement('div',{className:'booking-breakdown-price'},'R '+simultaneousStaffingPremium.toLocaleString())
       ),
       React.createElement('div',{className:'booking-breakdown-total'},
         React.createElement('span',null,'Estimated treatment total'),
@@ -571,7 +571,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
     ),
     React.createElement('div',{className:'nav-row'},
       React.createElement('button',{className:'btn-ghost',onClick:onBack},'← Back'),
-      isGroup&&React.createElement('button',{className:'btn-primary',disabled:(isGroup?count<3:count<1)||count>8,onClick:confirm,style:{flex:1}},'Continue to Date & Time')
+      React.createElement('button',{className:'btn-primary',disabled:(isGroup?count<3:count<1)||count>8,onClick:confirm,style:{flex:1}},'Continue to Date & Time')
     )
   );
 }
