@@ -383,7 +383,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
     return {...p,[k]:[...remaining,id]};
   });
   const simultaneousStaffingPremium=!isGroup&&guestCount===2&&individualArrangement==='simultaneous'?400:0;
-  const groupStaffingBounds=isGroup?getGroupTherapistBounds(parts):{hasRoyalty:false,allRoyalty:false,min:1,max:guestCount};
+  const groupStaffingBounds=isGroup?getGroupTherapistBounds(parts.map(p=>({...p,serviceId:getSvc(p.key)}))):{hasRoyalty:false,allRoyalty:false,min:1,max:guestCount};
   const rawGroupTherapists=Number(group.therapistCount)||groupStaffingBounds.min;
   const cappedGroupTherapists=Math.max(groupStaffingBounds.min,Math.min(groupStaffingBounds.max,rawGroupTherapists));
   const selectedGroupTherapists=groupStaffingBounds.allRoyalty
