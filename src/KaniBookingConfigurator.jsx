@@ -36,8 +36,8 @@ const INTENTS=[
   {id:'luxury',label:'Luxury Indulgence',desc:'A curated experience of pure opulence'},
 ];
 const CATEGORIES=[
-  {id:'individual',label:'Individual & Couples',desc:'Personalised treatments for one or two guests'},
-  {id:'group',label:'Small Groups',desc:'Book treatments for 3–8 guests together in a private, informal setting'},
+  {id:'individual',label:'Individual & Couples',desc:'Personalised treatments for one or two clients'},
+  {id:'group',label:'Small Groups',desc:'Book treatments for 3–8 clients together in a private, informal setting'},
   {id:'events',label:'Events & Celebrations',desc:'Coordinated massage services for celebrations, retreats and special events'},
   {id:'corporate',label:'Corporate Wellness',desc:'Tailored wellbeing for teams and businesses'},
 ];
@@ -65,6 +65,17 @@ function fmtDate(d){if(!d)return'';return`${d.getDate()} ${MONTHS[d.getMonth()]}
 function getItemDuration(it){
   return ((parseInt(it.duration)||60)*(it.serviceId==='couples'&&(it.therapistCount||1)===1?2:1))+it.addons.reduce((sum,a)=>sum+(ADDONS[a]?.duration||0),0);
 }
+function getGroupStaffingAllocation(royaltyCount,standardCount,therapistCount){
+  const selected=Math.max(0,Number(therapistCount)||0);
+  const royaltyPairs=royaltyCount>0?Math.min(royaltyCount,Math.floor(selected/2)):0;
+  const royaltyTherapists=royaltyPairs*2;
+  const standardTherapists=Math.min(standardCount,Math.max(0,selected-royaltyTherapists));
+  const fee=royaltyCount>0
+    ?Math.max(0,royaltyPairs-1)*400+standardTherapists*400
+    :Math.max(0,standardTherapists-1)*400;
+  return {royaltyPairs,royaltyTherapists,standardTherapists,fee};
+}
+
 function calculateTreatmentDuration(items){
   if(items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous'))return Math.max(...items.map(getItemDuration));
 
@@ -77,8 +88,9 @@ function calculateTreatmentDuration(items){
     const workloads=Array(therapistCount).fill(0);
     const tasks=items.map(it=>({
       duration:getItemDuration(it),
-      staff:Math.min(therapistCount,Math.max(1,Number(it.therapistCount)||1))
-    })).sort((a,b)=>b.duration-a.duration);
+      staff:Math.min(therapistCount,Math.max(1,Number(it.therapistCount)||1)),
+      isRoyalty:it.serviceId==='royalty'
+    })).sort((a,b)=>Number(b.isRoyalty)-Number(a.isRoyalty)||b.duration-a.duration);
 
     tasks.forEach(task=>{
       const available=workloads.map((load,index)=>({load,index})).sort((a,b)=>a.load-b.load).slice(0,task.staff);
@@ -108,16 +120,18 @@ export default function KaniBookingConfigurator(){
   const[time,setTime]=useState(null);
   const[addr,setAddr]=useState({name:'',street:'',suburb:'',notes:'',additionalNotes:''});
   const[group,setGroup]=useState({adults:3,children:0,eventType:'',therapistCount:1});
-  const[corp,setCorp]=useState({company:'',contact:'',attendees:2,eventType:'',location:''});
-  const[event,setEvent]=useState({contact:'',attendees:3,eventType:'',location:'',notes:''});
+  const[corp,setCorp]=useState({company:'',contact:'',attendees:15,eventType:'',location:''});
+  const[event,setEvent]=useState({contact:'',attendees:10,eventType:'',location:'',notes:''});
   const N=8;
   const totalMins=useMemo(()=>calculateTreatmentDuration(items),[items]);
   const simultaneousStaffingPremium=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?400:0;
   const baseTotal=useMemo(()=>items.reduce((s,it)=>s+it.price,0)+simultaneousStaffingPremium,[items,simultaneousStaffingPremium]);
   const isGroupBooking=items.length>0&&items.every(it=>it.groupTherapistCount!==undefined);
   const requestedGroupTherapists=isGroupBooking?Math.max(1,...items.map(it=>Number(it.groupTherapistCount)||1)):0;
-  const hasRoyalty=items.some(it=>it.serviceId==='royalty');
-  const additionalTherapistFee=isGroupBooking?Math.max(0,requestedGroupTherapists-(hasRoyalty?2:1))*400:0;
+  const groupRoyaltyCount=isGroupBooking?items.filter(it=>it.serviceId==='royalty').length:0;
+  const groupStandardCount=isGroupBooking?items.length-groupRoyaltyCount:0;
+  const groupStaffingAllocation=isGroupBooking?getGroupStaffingAllocation(groupRoyaltyCount,groupStandardCount,requestedGroupTherapists):null;
+  const additionalTherapistFee=groupStaffingAllocation?.fee||0;
   const ahFee=useMemo(()=>time?calcAH(time,totalMins):0,[time,totalMins]);
   const final=baseTotal+additionalTherapistFee+ahFee;
   const next=()=>setStep(s=>Math.min(s+1,N-1));
@@ -128,9 +142,10 @@ export default function KaniBookingConfigurator(){
     const simultaneousIndividual=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous');
     const isGroupBooking=items.length>0&&items.every(it=>it.groupTherapistCount!==undefined);
     const therapists=isGroupBooking?Math.max(1,...items.map(it=>Number(it.groupTherapistCount)||1)):(simultaneousIndividual?items.reduce((sum,it)=>sum+(it.therapistCount||1),0):items.reduce((max,it)=>Math.max(max,it.therapistCount||1),0));
-    const arrangementDetails=items.some(it=>it.bookingArrangement)?'\nArrangement: '+(simultaneousIndividual?'Both guests treated at the same time':'Guests treated one after the other'):'';
+    const arrangementDetails=items.some(it=>it.bookingArrangement)?'\nArrangement: '+(simultaneousIndividual?'Both clients treated at the same time':'Clients treated one after the other'):'';
     const staffingPremiumDetails=simultaneousStaffingPremium?'\nAdditional staffing for simultaneous treatment: R'+simultaneousStaffingPremium:'';
     const therapistFeeDetails=additionalTherapistFee?'\nAdditional therapist fee: R'+additionalTherapistFee.toLocaleString():'';
+    const groupAllocationDetails=groupStaffingAllocation?'\nGroup staffing allocation: '+groupStaffingAllocation.royaltyPairs+' Royalty pair(s), '+groupStaffingAllocation.standardTherapists+' standard therapist(s)':'';
     const lines=items.map(it=>{
       const adds=it.addons.map(a=>ADDONS[a]).filter(Boolean);
       const addText=adds.map(a=>`${a.name} (+${a.duration} min)`);
@@ -160,7 +175,7 @@ Could you help me explore the options and put together a tailored quote? Thanks 
 I'm planning an event and would love to explore having BeautyCall there. Here are the details:
 
 Event: ${event.eventType||'Not specified yet'}
-Number of guests: ${event.attendees}
+Number of clients: ${event.attendees}
 Contact name: ${event.contact||addr.name}
 Location: ${event.location||location||'To be confirmed'}
 Preferred date and time: ${dateTime||'To be discussed'}${event.notes?'\nA little more about the event: '+event.notes:''}
@@ -169,7 +184,7 @@ Could you let me know what options might work and help me with a quote? Thank yo
     }else{
       const bookingType=items.some(it=>it.serviceId==='couples')?'a couples massage':cat==='group'?'a group massage experience':'a massage';
       const pricing=(cat==='corporate'||cat==='events')?'':`\n\nMy treatment selection:
-${lines}${arrangementDetails}${staffingPremiumDetails}${therapistFeeDetails}
+${lines}${arrangementDetails}${staffingPremiumDetails}${groupAllocationDetails}${therapistFeeDetails}
 Estimated treatment time: ${totalMins} minutes${ahFee?'\nAfter-hours fee: R'+ahFee.toLocaleString():''}
 Estimated total: R${final.toLocaleString()}`;
       const groupInfo=cat==='group'? `\nGroup occasion: ${group.eventType||'Not specified yet'}\nGuests: ${group.adults+group.children}`:'';
@@ -201,7 +216,7 @@ ${notes?notes+'\n\n':''}Would you please let me know if this works and if you ne
     step===3&&React.createElement(S4Date,{date,setDate,onNext:next,onBack:back}),
     step===4&&React.createElement(S5Time,{time,setTime,items,onNext:next,onBack:back}),
     step===5&&React.createElement(S6Address,{addr,setAddr,onNext:next,onBack:back}),
-    step===6&&React.createElement(S7Summary,{intent,cat,date,time,addr,items,baseTotal,additionalTherapistFee,ahFee,final,corp,event,simultaneousStaffingPremium,onNext:next,onBack:back}),
+    step===6&&React.createElement(S7Summary,{intent,cat,date,time,addr,items,baseTotal,additionalTherapistFee,groupStaffingAllocation,ahFee,final,corp,event,simultaneousStaffingPremium,onNext:next,onBack:back}),
     step===7&&React.createElement(S8Checkout,{sendWA,onBack:back,final,cat})
   );
 }
@@ -348,6 +363,14 @@ function S3Builder({cat,items,setItems,group,setGroup,corp,setCorp,event,setEven
   return React.createElement(GuestBuilder,{mode:cat==='group'?'group':'individual',group,setGroup,setItems,items,onNext,onBack});
 }
 
+function getGroupTherapistBounds(parts){
+  const royaltyCount=parts.filter(p=>!p.key.startsWith('c')&&p.serviceId==='royalty').length;
+  const standardCount=parts.length-royaltyCount;
+  const hasRoyalty=royaltyCount>0;
+  const allRoyalty=hasRoyalty&&standardCount===0;
+  return {hasRoyalty,allRoyalty,royaltyCount,standardCount,min:hasRoyalty?2:1,max:hasRoyalty?(royaltyCount*2+standardCount):parts.length};
+}
+
 function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
   const isGroup=mode==='group';
   const[guestCount,setGuestCount]=useState(()=>isGroup?1:items[0]?.serviceId==='couples'?2:Math.max(1,items.length));
@@ -375,9 +398,15 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
     return {...p,[k]:[...remaining,id]};
   });
   const simultaneousStaffingPremium=!isGroup&&guestCount===2&&individualArrangement==='simultaneous'?400:0;
-  const groupHasRoyalty=isGroup&&parts.some(p=>!isChild(p.key)&&getSvc(p.key)==='royalty');
-  const groupIncludedTherapists=groupHasRoyalty?2:1;
-  const groupTherapistFee=isGroup?Math.max(0,(group.therapistCount||1)-groupIncludedTherapists)*400:0;
+  const groupStaffingBounds=isGroup?getGroupTherapistBounds(parts.map(p=>({...p,serviceId:getSvc(p.key)}))):{hasRoyalty:false,allRoyalty:false,min:1,max:guestCount};
+  const rawGroupTherapists=Number(group.therapistCount)||groupStaffingBounds.min;
+  const cappedGroupTherapists=Math.max(groupStaffingBounds.min,Math.min(groupStaffingBounds.max,rawGroupTherapists));
+  const selectedGroupTherapists=groupStaffingBounds.allRoyalty
+    ?Math.max(2,cappedGroupTherapists-cappedGroupTherapists%2)
+    :cappedGroupTherapists;
+  const groupIncludedTherapists=groupStaffingBounds.hasRoyalty?2:1;
+  const groupStaffingAllocation=isGroup?getGroupStaffingAllocation(groupStaffingBounds.royaltyCount,groupStaffingBounds.standardCount,selectedGroupTherapists):null;
+  const groupTherapistFee=groupStaffingAllocation?.fee||0;
   const groupTreatmentSubtotal=!isGroup&&guestCount===2&&couplesPackage?calcPrice('couples',couplesDuration,[],true):parts.reduce((sum,p)=>sum+calcPrice(getSvc(p.key),getDur(p.key),getAdd(p.key),false),0)+simultaneousStaffingPremium;
   const groupTotal=groupTreatmentSubtotal+groupTherapistFee;
   function updateCount(type,delta){
@@ -388,7 +417,15 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
       if(currentTotal+delta<3||currentTotal+delta>8)return g;
       const adults=type==='Adult'?Math.max(0,Math.min(8-g.children,g.adults+delta)):g.adults;
       const children=type==='Child'?Math.max(0,Math.min(8-g.adults,g.children+delta)):g.children;
-      return {...g,adults,children};
+      const nextTotal=adults+children;
+      const nextParts=Array.from({length:nextTotal},(_,i)=>{
+        const key=i<adults?'a'+i:'c'+(i-adults);
+        return {key,serviceId:key.startsWith('c')?'kiddies':pSvc[key]||'swedish'};
+      });
+      const bounds=getGroupTherapistBounds(nextParts);
+      let therapistCount=Math.max(bounds.min,Math.min(bounds.max,Number(g.therapistCount)||bounds.min));
+      if(bounds.allRoyalty&&therapistCount%2)therapistCount=Math.max(2,therapistCount-1);
+      return {...g,adults,children,therapistCount};
     });
   }
   function confirm(){
@@ -397,18 +434,18 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
       setItems([{id:uuid(),serviceId:'couples',duration:couplesDuration,addons:[],price:calcPrice('couples',couplesDuration,[],true),therapistCount:2,label:'Couples Massage — simultaneous'}]);
     }else{
       const arrangement=!isGroup&&guestCount===2?individualArrangement:null;
-      setItems(parts.map(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);return {id:uuid(),serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:sid==='royalty'?2:1,groupTherapistCount:isGroup?(group.therapistCount||1):undefined,bookingArrangement:arrangement,guestName:pName[p.key]?.trim()||'',label:(pName[p.key]?.trim()||p.type+' '+p.num)+(arrangement?' — '+(arrangement==='simultaneous'?'simultaneous individual treatment':'sequential individual treatment'):'')}}));
+      setItems(parts.map(p=>{const sid=getSvc(p.key),d=getDur(p.key),a=getAdd(p.key);return {id:uuid(),serviceId:sid,duration:d,addons:a,price:calcPrice(sid,d,a,false),therapistCount:sid==='royalty'?2:1,groupTherapistCount:isGroup?selectedGroupTherapists:undefined,bookingArrangement:arrangement,guestName:pName[p.key]?.trim()||'',label:(pName[p.key]?.trim()||p.type+' '+p.num)+(arrangement?' — '+(arrangement==='simultaneous'?'simultaneous individual treatment':'sequential individual treatment'):'')}}));
     }
     setConfirmed(true);
     onNext();
   }
   const summaryItems = !isGroup&&guestCount===2&&couplesPackage
-    ? [{key:'couples-package',label:'Couples Massage',serviceId:'couples',duration:couplesDuration,addons:[],price:calcPrice('couples',couplesDuration,[],true),detail:'Two guests · simultaneous'}]
+    ? [{key:'couples-package',label:'Couples Massage',serviceId:'couples',duration:couplesDuration,addons:[],price:calcPrice('couples',couplesDuration,[],true),detail:'Two clients · simultaneous'}]
     : parts.map(p=>({key:p.key,label:pName[p.key]?.trim()||p.type+' '+p.num,serviceId:getSvc(p.key),duration:getDur(p.key),addons:getAdd(p.key),price:calcPrice(getSvc(p.key),getDur(p.key),getAdd(p.key),false),detail:isGroup?'Group treatment':(!isGroup&&guestCount===2?(individualArrangement==='simultaneous'?'Simultaneous':'Sequential'):'Individual treatment')}));
   return React.createElement('div',{className:'fx'},
     React.createElement('div',{className:'step-eyebrow'},'Step 03'),
-    React.createElement('div',{className:'step-title'},isGroup?'Small Group Experience':'Personalise Each Guest’s Experience'),
-    React.createElement('div',{className:'step-sub'},isGroup?'For 3–8 guests booking treatments together in a private, informal setting.':'Choose one or two guests, then select a treatment for each person.'),
+    React.createElement('div',{className:'step-title'},isGroup?'Small Group Experience':'Personalise Each Client’s Experience'),
+    React.createElement('div',{className:'step-sub'},isGroup?'For 3–8 clients booking treatments together in a private, informal setting.':'Choose one or two clients, then select a treatment for each person.'),
     !confirmed&&React.createElement('div',null,
       !isGroup&&React.createElement('div',{className:'premium-service-grid'},
         React.createElement('button',{type:'button',className:'premium-service-card'+(!couplesPackage&&guestCount===1&&getSvc('g0')==='royalty'?' selected':''),onClick:()=>{setGuestCount(1);setCouplesPackage(false);setPSvc(prev=>({...prev,g0:'royalty'}));setConfirmed(false)}},
@@ -449,37 +486,37 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
           )
         ),
         React.createElement('div',{className:'info-box group-booking-info',style:{marginBottom:10}},
-          React.createElement('div',{className:'group-booking-note'},'3–8 guests. Children under 14 receive a 30-min Kiddies Massage (R300).'),
+          React.createElement('div',{className:'group-booking-note'},'3–8 clients. Children under 14 receive a 30-min Kiddies Massage (R300).'),
           React.createElement('div',{className:'group-booking-links'},
             React.createElement('a',{className:'concierge-link',href:'https://wa.me/27624771887?text='+encodeURIComponent('Hi BeautyCall, I would like to discuss a treatment or duration request for a child under 14.'),target:'_blank',rel:'noopener noreferrer'},'Request a child treatment change'),
-            React.createElement('a',{className:'concierge-link',href:'https://wa.me/27624771887?text=Hi%20BeautyCall%2C%20I%27d%20like%20a%20bespoke%20quote%20for%20a%20group%20massage%20booking%20for%209%2B%20guests.',target:'_blank',rel:'noopener noreferrer'},'Booking 9+ guests? Get a quote')
+            React.createElement('a',{className:'concierge-link',href:'https://wa.me/27624771887?text=Hi%20BeautyCall%2C%20I%27d%20like%20a%20bespoke%20quote%20for%20a%20group%20massage%20booking%20for%209%2B%20clients.',target:'_blank',rel:'noopener noreferrer'},'Booking 9+ clients? Get a quote')
           )
         )
       ),
       !isGroup&&React.createElement('div',{className:'field-group'},
-        React.createElement('span',{className:'field-label'},'Number of guests'),
+        React.createElement('span',{className:'field-label'},'Number of clients'),
         React.createElement('div',{className:'toggle-row'},
-          React.createElement('button',{type:'button',className:'toggle-opt'+(guestCount===1?' active':''),onClick:()=>{setGuestCount(1);setCouplesPackage(false);setConfirmed(false)}},'One guest'),
-          React.createElement('button',{type:'button',className:'toggle-opt'+(guestCount===2?' active':''),onClick:()=>{setGuestCount(2);setCouplesPackage(false);setConfirmed(false)}},'Two guests')
+          React.createElement('button',{type:'button',className:'toggle-opt'+(guestCount===1?' active':''),onClick:()=>{setGuestCount(1);setCouplesPackage(false);setConfirmed(false)}},'One client'),
+          React.createElement('button',{type:'button',className:'toggle-opt'+(guestCount===2?' active':''),onClick:()=>{setGuestCount(2);setCouplesPackage(false);setConfirmed(false)}},'Two clients')
         )
       ),
-      isGroup&&count<3&&React.createElement('div',{className:'info-box'},React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)'}},'Small group bookings start at 3 guests. Add at least 3 guests to continue.')),
+      isGroup&&count<3&&React.createElement('div',{className:'info-box'},React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)'}},'Small group bookings start at 3 clients. Add at least 3 clients to continue.')),
       !isGroup&&guestCount===2&&!couplesPackage&&React.createElement('div',{className:'p-card',style:{marginBottom:16}},
         React.createElement('div',{className:'p-name',style:{marginBottom:10}},'Individual Treatment Arrangement'),
         React.createElement('div',{className:'field-label'},'How should the two sessions be scheduled?'),
         React.createElement('div',{className:'toggle-row'},
           React.createElement('button',{type:'button',className:'toggle-opt'+(individualArrangement==='sequential'?' active':''),onClick:()=>{setIndividualArrangement('sequential');setConfirmed(false)}},React.createElement('div',{className:'toggle-opt-title'},'Sequential'),React.createElement('div',{className:'toggle-opt-sub'},'One therapist at a time')),
-          React.createElement('button',{type:'button',className:'toggle-opt'+(individualArrangement==='simultaneous'?' active':''),onClick:()=>{setIndividualArrangement('simultaneous');setConfirmed(false)}},React.createElement('div',{className:'toggle-opt-title'},'Simultaneous'),React.createElement('div',{className:'toggle-opt-sub'},'Guests treated together'))
+          React.createElement('button',{type:'button',className:'toggle-opt'+(individualArrangement==='simultaneous'?' active':''),onClick:()=>{setIndividualArrangement('simultaneous');setConfirmed(false)}},React.createElement('div',{className:'toggle-opt-title'},'Simultaneous'),React.createElement('div',{className:'toggle-opt-sub'},'Clients treated together'))
         ),
-        React.createElement('div',{className:'info-box',style:{margin:'8px 0 0'}},React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},individualArrangement==='sequential'?'One therapist treats each guest in turn. Each guest can choose a different treatment and duration; total booking time includes both sessions.':'Both guests are treated at the same time by separate therapists. Each guest keeps their own treatment, duration and price. Royalty remains a four-handed treatment and requires two therapists for that guest.'))
+        React.createElement('div',{className:'info-box',style:{margin:'8px 0 0'}},React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},individualArrangement==='sequential'?'One therapist treats each client in turn. Each client can choose a different treatment and duration; total booking time includes both sessions.':'Both clients are treated at the same time by separate therapists. Each client keeps their own treatment, duration and price. Royalty remains a four-handed treatment and requires two therapists for that client.'))
       ),
       !isGroup&&couplesPackage&&React.createElement('div',{className:'p-card',style:{marginBottom:16}},
         React.createElement('div',{className:'p-head'},
           React.createElement('div',{className:'p-name'},'Couples Massage · Simultaneous'),
           React.createElement('div',{className:'p-price'},'R '+calcPrice('couples',couplesDuration,[],true).toLocaleString())
         ),
-        React.createElement('div',{className:'field-label'},'Two therapists · both guests treated together'),
-        React.createElement('div',{className:'info-box',style:{margin:'10px 0 16px'}},React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},'The selected duration applies to each guest.')),
+        React.createElement('div',{className:'field-label'},'Two therapists · both clients treated together'),
+        React.createElement('div',{className:'info-box',style:{margin:'10px 0 16px'}},React.createElement('div',{style:{fontSize:12,color:'var(--cream-dim)',lineHeight:1.6}},'The selected duration applies to each client.')),
         React.createElement('div',{className:'field-label'},'Session duration'),
         React.createElement('div',{style:{display:'flex',gap:6,marginBottom:12,flexWrap:'wrap'}},
           Object.keys(SERVICES.couples.durations).map(d=>React.createElement('button',{key:d,type:'button',className:'dur-btn'+(couplesDuration===Number(d)?' active':''),onClick:()=>{setCouplesDuration(Number(d));setConfirmed(false)}},d+' min'))
@@ -505,7 +542,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
               React.createElement('span',{className:'guest-card-chevron','aria-hidden':true},isOpen?'−':'+')
             ),
             isOpen&&React.createElement('div',{className:'guest-card-content'},
-              React.createElement('label',{className:'field-label'},'Guest name'),
+              React.createElement('label',{className:'field-label'},'Client name'),
               React.createElement('input',{className:'input guest-name-input',type:'text',placeholder:'',value:pName[p.key]||'',onChange:e=>{setPName(prev=>({...prev,[p.key]:e.target.value}));setConfirmed(false)}}),
               isChild(p.key)?React.createElement('div',null,
                 React.createElement('div',{className:'field-label'},'Kiddies Massage · 30 minutes'),
@@ -536,11 +573,19 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
     ),
     isGroup&&React.createElement('div',{className:'p-card group-therapist-selector',style:{marginTop:18}},
       React.createElement('div',{className:'p-name'},'Therapists for your group'),
-      React.createElement('div',{className:'field-label'},'Choose how many therapists will work across the group after reviewing each guest’s treatment.'),
+      React.createElement('div',{className:'field-label'},groupStaffingBounds.hasRoyalty
+        ?'Royalty requires two therapists. Choose the team size that will work across the group; treatments can be scheduled in rotations.'
+        :'Choose how many therapists will work across the group.'),
       React.createElement('div',{className:'toggle-row',style:{flexWrap:'wrap'}},
-        Array.from({length:count},(_,i)=>i+1).map(n=>React.createElement('button',{key:n,type:'button',className:'toggle-opt'+((group.therapistCount||1)===n?' active':''),onClick:()=>setGroup(g=>({...g,therapistCount:n}))},n+(n===1?' therapist':' therapists')))
+        Array.from({length:Math.max(0,groupStaffingBounds.max-groupStaffingBounds.min)+1},(_,i)=>groupStaffingBounds.min+i)
+          .filter(n=>!groupStaffingBounds.allRoyalty||n%2===0)
+          .map(n=>React.createElement('button',{key:n,type:'button',className:'toggle-opt'+(selectedGroupTherapists===n?' active':''),onClick:()=>setGroup(g=>({...g,therapistCount:n}))},n+(n===1?' therapist':' therapists')))
       ),
-      React.createElement('div',{className:'booking-breakdown-detail',style:{marginTop:10}},(()=>{const royaltySelected=parts.some(p=>!isChild(p.key)&&getSvc(p.key)==='royalty');const includedTherapists=royaltySelected?2:1;const fee=Math.max(0,(group.therapistCount||1)-includedTherapists)*400;return fee>0?'Additional therapist fee: R '+fee.toLocaleString()+' ('+(group.therapistCount||1)+' selected, '+includedTherapists+' included)':'No additional therapist fee.'})())
+      React.createElement('div',{className:'booking-breakdown-detail',style:{marginTop:10}},groupTherapistFee>0
+        ?'Royalty-first allocation: '+groupStaffingAllocation.royaltyPairs+' Royalty pair(s) and '+groupStaffingAllocation.standardTherapists+' standard therapist(s). Additional therapist fee: R '+groupTherapistFee.toLocaleString()
+        :'No additional therapist fee.'),
+      groupStaffingBounds.allRoyalty&&React.createElement('div',{className:'booking-breakdown-detail',style:{marginTop:6}},'Royalty-only groups select therapists in pairs.')
+
     ),
     React.createElement('div',{className:'booking-breakdown'},
       React.createElement('div',{className:'booking-breakdown-heading'},'Your treatment breakdown'),
@@ -560,7 +605,7 @@ function GuestBuilder({mode,group,setGroup,setItems,items,onNext,onBack}){
         React.createElement('div',{className:'booking-breakdown-price'},'R '+groupTherapistFee.toLocaleString())
       ),
       !isGroup&&guestCount===2&&couplesPackage===false&&individualArrangement==='simultaneous'&&React.createElement('div',{className:'booking-breakdown-item'},
-        React.createElement('div',{className:'booking-breakdown-copy'},React.createElement('div',{className:'booking-breakdown-name'},'Simultaneous Staffing Premium'),React.createElement('div',{className:'booking-breakdown-detail'},'A flat R400 premium for both guests being treated simultaneously')),
+        React.createElement('div',{className:'booking-breakdown-copy'},React.createElement('div',{className:'booking-breakdown-name'},'Simultaneous Staffing Premium'),React.createElement('div',{className:'booking-breakdown-detail'},'A flat R400 premium for both clients being treated simultaneously')),
         React.createElement('div',{className:'booking-breakdown-price'},'R '+simultaneousStaffingPremium.toLocaleString())
       ),
       React.createElement('div',{className:'booking-breakdown-total'},
@@ -587,8 +632,12 @@ function EventBuilder({event,setEvent,onNext,onBack}){
       React.createElement(CustomSelect,{value:event.eventType,className:'event-select',options:[{value:'',label:'Select an event'},...['Bridal Party','Birthday Celebration','Wedding','Private Celebration','Wellness Retreat','Other'].map(v=>({value:v,label:v}))],onChange:value=>setEvent(prev=>({...prev,eventType:value})),ariaLabel:'Choose event type'})
     ),
     React.createElement('div',{className:'field-group'},
-      React.createElement('label',{className:'field-label'},'Estimated Guests'),
-      React.createElement('input',{className:'input',type:'number',min:1,value:event.attendees,onChange:e=>setEvent(v=>({...v,attendees:Math.max(1,Math.min(500,Number(e.target.value)||1))}))})
+      React.createElement('label',{className:'field-label'},'Estimated Clients'),
+      React.createElement('div',{className:'stepper',style:{justifyContent:'center'}},
+        React.createElement('button',{type:'button',className:'stp-btn',onClick:()=>setEvent(v=>({...v,attendees:Math.max(1,(Number(v.attendees)||1)-1)}))},'−'),
+        React.createElement('input',{className:'input stp-val no-number-spinner',type:'number',min:1,max:500,step:1,'aria-label':'Estimated clients',value:event.attendees,onChange:e=>setEvent(v=>({...v,attendees:e.target.value===''?'':Math.max(1,Math.min(500,Number(e.target.value)||1))})),onBlur:()=>setEvent(v=>({...v,attendees:Math.max(1,Math.min(500,Number(v.attendees)||1))})),style:{width:64,minWidth:64,flex:'0 0 64px',textAlign:'center'}}),
+        React.createElement('button',{type:'button',className:'stp-btn',onClick:()=>setEvent(v=>({...v,attendees:Math.min(500,(Number(v.attendees)||1)+1)}))},'＋')
+      )
     ),
     React.createElement('div',{className:'field-group'},
       React.createElement('label',{className:'field-label'},'Event Location'),
@@ -626,10 +675,10 @@ function CorpBuilder({corp,setCorp,onNext,onBack}){
     ),
     React.createElement('div',{className:'field-group'},
       React.createElement('label',{className:'field-label'},'Number of Attendees'),
-      React.createElement('div',{className:'stepper'},
-        React.createElement('button',{className:'stp-btn',onClick:()=>setCorp(c=>({...c,attendees:Math.max(1,c.attendees-1)}))},'−'),
-        React.createElement('div',{className:'stp-val'},corp.attendees),
-        React.createElement('button',{className:'stp-btn',onClick:()=>setCorp(c=>({...c,attendees:c.attendees+1}))},'＋')
+      React.createElement('div',{className:'stepper',style:{justifyContent:'center'}},
+        React.createElement('button',{type:'button',className:'stp-btn',onClick:()=>setCorp(c=>({...c,attendees:Math.max(1,(Number(c.attendees)||1)-1)}))},'−'),
+        React.createElement('input',{className:'input stp-val no-number-spinner',type:'number',min:1,max:500,step:1,'aria-label':'Number of attendees',value:corp.attendees,onChange:e=>setCorp(c=>({...c,attendees:e.target.value===''?'':Math.max(1,Math.min(500,Number(e.target.value)||1))})),onBlur:()=>setCorp(c=>({...c,attendees:Math.max(1,Math.min(500,Number(c.attendees)||1))})),style:{width:64,minWidth:64,flex:'0 0 64px',textAlign:'center'}}),
+        React.createElement('button',{type:'button',className:'stp-btn',onClick:()=>setCorp(c=>({...c,attendees:Math.min(500,(Number(c.attendees)||1)+1)}))},'＋')
       )
     ),
     React.createElement('div',{className:'info-box',style:{marginTop:8}},
@@ -743,7 +792,7 @@ function S6Address({addr,setAddr,onNext,onBack}){
     )
   );
 }
-function S7Summary({intent,cat,date,time,addr,items,baseTotal,additionalTherapistFee,ahFee,final,corp,event,simultaneousStaffingPremium,onNext,onBack}){
+function S7Summary({intent,cat,date,time,addr,items,baseTotal,additionalTherapistFee,groupStaffingAllocation,ahFee,final,corp,event,simultaneousStaffingPremium,onNext,onBack}){
   const totalMins=calculateTreatmentDuration(items);
   const endTime= time ? (()=>{const [h,m]=time.split(':').map(Number);const end=(h*60+m+totalMins)%1440;return `${String(Math.floor(end/60)).padStart(2,'0')}:${String(end%60).padStart(2,'0')}`})() : '';
   const isCorp=cat==='corporate';
@@ -783,7 +832,7 @@ function S7Summary({intent,cat,date,time,addr,items,baseTotal,additionalTherapis
       !isQuote&&simultaneousStaffingPremium>0&&React.createElement('div',{className:'summ-row'},
         React.createElement('div',null,
           React.createElement('div',{style:{fontSize:13,color:'var(--cream-dim)'}},'Simultaneous Staffing Premium'),
-          React.createElement('div',{style:{fontSize:11,color:'var(--cream-dim)',marginTop:3}},'Additional therapist staffing required to treat both guests at the same time')
+          React.createElement('div',{style:{fontSize:11,color:'var(--cream-dim)',marginTop:3}},'Additional therapist staffing required to treat both clients at the same time')
         ),
         React.createElement('div',{className:'summ-row-price'},'R '+simultaneousStaffingPremium.toLocaleString())
       ),
@@ -791,6 +840,10 @@ function S7Summary({intent,cat,date,time,addr,items,baseTotal,additionalTherapis
         React.createElement('div',{className:'summ-row'},
           React.createElement('div',{style:{fontSize:13,color:'var(--cream-dim)'}},'Therapists Required'),
           React.createElement('div',{style:{fontSize:13,color:'var(--cream)'}},therapists)
+        ),
+        groupStaffingAllocation&&React.createElement('div',{className:'summ-row'},
+          React.createElement('div',{style:{fontSize:13,color:'var(--cream-dim)'}},'Group Staffing Allocation'),
+          React.createElement('div',{style:{fontSize:13,color:'var(--cream)'}},groupStaffingAllocation.royaltyPairs+' Royalty pair(s) · '+groupStaffingAllocation.standardTherapists+' standard therapist(s)')
         ),
         React.createElement('div',{className:'summ-row'},
           React.createElement('div',{style:{fontSize:13,color:'var(--cream-dim)'}},'Estimated Treatment Time'),
@@ -815,7 +868,7 @@ function S7Summary({intent,cat,date,time,addr,items,baseTotal,additionalTherapis
       ),
       cat==='events'&&React.createElement('div',{className:'info-box',style:{marginTop:12}},
         React.createElement('div',{style:{fontSize:10,letterSpacing:'0.12em',textTransform:'uppercase',color:'var(--blush)',marginBottom:4}},'Event Enquiry'),
-        React.createElement('div',{style:{fontSize:13,color:'var(--cream-dim)',lineHeight:1.7}},event.eventType+' · '+event.attendees+' guests · '+event.location+(event.contact?' · Contact: '+event.contact:'')+(event.notes?' · '+event.notes:'')+'. Our concierge will prepare a tailored quote.')
+        React.createElement('div',{style:{fontSize:13,color:'var(--cream-dim)',lineHeight:1.7}},event.eventType+' · '+event.attendees+' clients · '+event.location+(event.contact?' · Contact: '+event.contact:'')+(event.notes?' · '+event.notes:'')+'. Our concierge will prepare a tailored quote.')
       ),
       isCorp&&React.createElement('div',{className:'info-box',style:{marginTop:12}},
         React.createElement('div',{style:{fontSize:10,letterSpacing:'0.12em',textTransform:'uppercase',color:'var(--blush)',marginBottom:4}},'Corporate Quote'),
