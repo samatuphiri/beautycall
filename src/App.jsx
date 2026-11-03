@@ -171,6 +171,8 @@ export default function KaniLanding() {
           .svc-grid { grid-template-columns: 1fr 1fr !important; }
           .cal-time-grid { grid-template-columns: 1fr !important; }
         }
+        .no-number-spinner { text-align: center; -moz-appearance: textfield; appearance: textfield; }
+        .no-number-spinner::-webkit-inner-spin-button, .no-number-spinner::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
       `}</style>
 
       {/* Noise overlay */}
