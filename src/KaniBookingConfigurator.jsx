@@ -120,8 +120,8 @@ export default function KaniBookingConfigurator(){
   const[time,setTime]=useState(null);
   const[addr,setAddr]=useState({name:'',street:'',suburb:'',notes:'',additionalNotes:''});
   const[group,setGroup]=useState({adults:3,children:0,eventType:'',therapistCount:1});
-  const[corp,setCorp]=useState({company:'',contact:'',attendees:2,eventType:'',location:''});
-  const[event,setEvent]=useState({contact:'',attendees:3,eventType:'',location:'',notes:''});
+  const[corp,setCorp]=useState({company:'',contact:'',attendees:15,eventType:'',location:''});
+  const[event,setEvent]=useState({contact:'',attendees:10,eventType:'',location:'',notes:''});
   const N=8;
   const totalMins=useMemo(()=>calculateTreatmentDuration(items),[items]);
   const simultaneousStaffingPremium=items.length===2&&items.every(it=>it.bookingArrangement==='simultaneous')?400:0;
