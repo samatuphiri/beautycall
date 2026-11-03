@@ -633,7 +633,11 @@ function EventBuilder({event,setEvent,onNext,onBack}){
     ),
     React.createElement('div',{className:'field-group'},
       React.createElement('label',{className:'field-label'},'Estimated Clients'),
-      React.createElement('input',{className:'input',type:'number',min:1,max:500,step:1,value:event.attendees,onChange:e=>setEvent(v=>({...v,attendees:e.target.value===''?'':Math.max(1,Math.min(500,Number(e.target.value)||1))})),onBlur:()=>setEvent(v=>({...v,attendees:Math.max(1,Math.min(500,Number(v.attendees)||1))}))})
+      React.createElement('div',{className:'stepper'},
+        React.createElement('button',{type:'button',className:'stp-btn',onClick:()=>setEvent(v=>({...v,attendees:Math.max(1,(Number(v.attendees)||1)-1)}))},'−'),
+        React.createElement('input',{className:'input stp-val',type:'number',min:1,max:500,step:1,'aria-label':'Estimated clients',value:event.attendees,onChange:e=>setEvent(v=>({...v,attendees:e.target.value===''?'':Math.max(1,Math.min(500,Number(e.target.value)||1))})),onBlur:()=>setEvent(v=>({...v,attendees:Math.max(1,Math.min(500,Number(v.attendees)||1))})),style:{width:64,minWidth:64,flex:'0 0 64px',textAlign:'center'}}),
+        React.createElement('button',{type:'button',className:'stp-btn',onClick:()=>setEvent(v=>({...v,attendees:Math.min(500,(Number(v.attendees)||1)+1)}))},'＋')
+      )
     ),
     React.createElement('div',{className:'field-group'},
       React.createElement('label',{className:'field-label'},'Event Location'),
@@ -673,7 +677,7 @@ function CorpBuilder({corp,setCorp,onNext,onBack}){
       React.createElement('label',{className:'field-label'},'Number of Attendees'),
       React.createElement('div',{className:'stepper'},
         React.createElement('button',{type:'button',className:'stp-btn',onClick:()=>setCorp(c=>({...c,attendees:Math.max(1,(Number(c.attendees)||1)-1)}))},'−'),
-        React.createElement('input',{className:'input stp-val',type:'number',min:1,max:500,step:1,'aria-label':'Number of attendees',value:corp.attendees,onChange:e=>setCorp(c=>({...c,attendees:e.target.value===''?'':Math.max(1,Math.min(500,Number(e.target.value)||1))})),onBlur:()=>setCorp(c=>({...c,attendees:Math.max(1,Math.min(500,Number(c.attendees)||1))}))}),
+        React.createElement('input',{className:'input stp-val',type:'number',min:1,max:500,step:1,'aria-label':'Number of attendees',value:corp.attendees,onChange:e=>setCorp(c=>({...c,attendees:e.target.value===''?'':Math.max(1,Math.min(500,Number(e.target.value)||1))})),onBlur:()=>setCorp(c=>({...c,attendees:Math.max(1,Math.min(500,Number(c.attendees)||1))})),style:{width:64,minWidth:64,flex:'0 0 64px',textAlign:'center'}}),
         React.createElement('button',{type:'button',className:'stp-btn',onClick:()=>setCorp(c=>({...c,attendees:Math.min(500,(Number(c.attendees)||1)+1)}))},'＋')
       )
     ),
