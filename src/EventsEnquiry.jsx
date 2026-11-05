@@ -167,8 +167,7 @@ export default function EventsEnquiry({ onSubmit, onBack }) {
       return Boolean(
         form.eventType &&
         (form.eventType !== "Other" || form.otherEventType.trim()) &&
-        Number(form.attendance) >= 1 &&
-        form.venueAddress.trim()
+        Number(form.attendance) >= 1
       );
     }
     if (stage === 1) {
