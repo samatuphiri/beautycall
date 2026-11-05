@@ -136,7 +136,7 @@ function ChoiceCard({ checked, onChange, children, description }) {
   );
 }
 
-export default function EventsEnquiry({ onSubmit }) {
+export default function EventsEnquiry({ onSubmit, onBack }) {
   const [stage, setStage] = useState(0);
   const [form, setForm] = useState(emptyForm);
   const [submitError, setSubmitError] = useState("");
@@ -189,6 +189,10 @@ export default function EventsEnquiry({ onSubmit }) {
   };
 
   const back = () => {
+    if (stage === 0) {
+      onBack?.();
+      return;
+    }
     setStage((current) => Math.max(current - 1, 0));
     setSubmitError("");
   };
@@ -496,7 +500,7 @@ export default function EventsEnquiry({ onSubmit }) {
           )}
 
           <div className="events-navigation">
-            <button type="button" className="events-back" onClick={back} disabled={stage === 0}>Back</button>
+            <button type="button" className="events-back" onClick={back} disabled={stage === 0 && !onBack}>Back</button>
             {stage < STAGES.length - 1 ? (
               <button type="button" className="events-next" onClick={next} disabled={!canContinue()}>Continue</button>
             ) : (
