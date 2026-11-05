@@ -174,7 +174,7 @@ Could you help me explore the options and put together a tailored quote? Thanks 
 
 I'm planning an event and would love to explore having BeautyCall there. Here are the details:
 
-Event: ${event.eventType||'Not specified yet'}
+Event: ${event.eventType==='Other'?(event.otherEventDescription||'Other event not specified'):event.eventType||'Not specified yet'}
 Number of clients: ${event.attendees}
 Contact name: ${event.contact||addr.name}
 Location: ${event.location||location||'To be confirmed'}
@@ -631,6 +631,10 @@ function EventBuilder({event,setEvent,onNext,onBack}){
       React.createElement('label',{className:'field-label'},'Event Type'),
       React.createElement(CustomSelect,{value:event.eventType,className:'event-select',options:[{value:'',label:'Select an event'},...['Bridal Party','Birthday Celebration','Wedding','Private Celebration','Wellness Retreat','Other'].map(v=>({value:v,label:v}))],onChange:value=>setEvent(prev=>({...prev,eventType:value})),ariaLabel:'Choose event type'})
     ),
+    event.eventType==='Other'&&React.createElement('div',{className:'field-group'},
+      React.createElement('label',{className:'field-label'},'What type of event would you like arranged?'),
+      React.createElement('textarea',{className:'input',placeholder:'Please describe the event you have in mind…',value:event.otherEventDescription||'',onChange:set('otherEventDescription')})
+    ),
     React.createElement('div',{className:'field-group'},
       React.createElement('label',{className:'field-label'},'Estimated Clients'),
       React.createElement('div',{className:'stepper',style:{justifyContent:'center'}},
@@ -656,7 +660,7 @@ function EventBuilder({event,setEvent,onNext,onBack}){
     ),
     React.createElement('div',{className:'nav-row'},
       React.createElement('button',{className:'btn-ghost',onClick:onBack},'← Back'),
-      React.createElement('button',{className:'btn-primary',disabled:!event.eventType||!event.location.trim(),onClick:onNext,style:{flex:1}},'Continue to Date')
+      React.createElement('button',{className:'btn-primary',disabled:!event.eventType||!event.location.trim()||(event.eventType==='Other'&&!event.otherEventDescription?.trim()),onClick:onNext,style:{flex:1}},'Continue to Date')
     )
   );
 }
@@ -868,7 +872,7 @@ function S7Summary({intent,cat,date,time,addr,items,baseTotal,additionalTherapis
       ),
       cat==='events'&&React.createElement('div',{className:'info-box',style:{marginTop:12}},
         React.createElement('div',{style:{fontSize:10,letterSpacing:'0.12em',textTransform:'uppercase',color:'var(--blush)',marginBottom:4}},'Event Enquiry'),
-        React.createElement('div',{style:{fontSize:13,color:'var(--cream-dim)',lineHeight:1.7}},event.eventType+' · '+event.attendees+' clients · '+event.location+(event.contact?' · Contact: '+event.contact:'')+(event.notes?' · '+event.notes:'')+'. Our concierge will prepare a tailored quote.')
+        React.createElement('div',{style:{fontSize:13,color:'var(--cream-dim)',lineHeight:1.7}},(event.eventType==='Other'?(event.otherEventDescription||'Other event'):event.eventType)+' · '+event.attendees+' clients · '+event.location+(event.contact?' · Contact: '+event.contact:'')+(event.notes?' · '+event.notes:'')+'. Our concierge will prepare a tailored quote.')
       ),
       isCorp&&React.createElement('div',{className:'info-box',style:{marginTop:12}},
         React.createElement('div',{style:{fontSize:10,letterSpacing:'0.12em',textTransform:'uppercase',color:'var(--blush)',marginBottom:4}},'Corporate Quote'),
