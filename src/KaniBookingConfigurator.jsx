@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import './KaniBookingConfigurator.css';
+import EventsEnquiry from './EventsEnquiry.jsx';
 
 const SERVICES={
   swedish:{id:'swedish',name:'Swedish',description:'Gentle flowing strokes for relaxation.',durations:{60:750,90:950,120:1150}},
@@ -104,6 +105,7 @@ function calculateTreatmentDuration(items){
 
 export default function KaniBookingConfigurator(){
   const[step,setStep]=useState(0);
+  const[showEventsEnquiry,setShowEventsEnquiry]=useState(false);
   const bookingRootRef=useRef(null);
   const previousStepRef=useRef(0);
   useEffect(()=>{
@@ -134,7 +136,7 @@ export default function KaniBookingConfigurator(){
   const additionalTherapistFee=groupStaffingAllocation?.fee||0;
   const ahFee=useMemo(()=>time?calcAH(time,totalMins):0,[time,totalMins]);
   const final=baseTotal+additionalTherapistFee+ahFee;
-  const next=()=>setStep(s=>Math.min(s+1,N-1));
+  const next=()=>{if(step===1&&cat==='events'){setShowEventsEnquiry(true);return;}setStep(s=>Math.min(s+1,N-1));};
   const back=()=>setStep(s=>Math.max(s-1,0));
   const selectCategory=id=>{if(id!==cat)setItems([]);setCat(id)};
 
@@ -200,6 +202,8 @@ ${notes?notes+'\n\n':''}Would you please let me know if this works and if you ne
     }
     window.open(`https://wa.me/27624771887?text=${encodeURIComponent(msg)}`,'_blank');
   }
+
+  if(showEventsEnquiry)return React.createElement(EventsEnquiry,{onBack:()=>setShowEventsEnquiry(false)});
 
   return React.createElement('div',{ref:bookingRootRef,className:'kani-booking-root wrap'},
     React.createElement('div',{className:'site-header'},
