@@ -35,13 +35,6 @@ const EXPERIENCE_TYPES = [
     extras: ["Mobile spa stations", "Custom wellness packages"],
   },
   {
-    id: "couples",
-    title: "Couples experience",
-    description: "Treatments and moments designed for couples.",
-    services: ["Swedish massage", "Aromatherapy massage", "Hot stone massage", "Couples treatments"],
-    extras: ["Couples treatments"],
-  },
-  {
     id: "custom",
     title: "Custom experience",
     description: "A tailored combination designed around your event.",
