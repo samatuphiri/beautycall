@@ -280,7 +280,31 @@ export default function EventsEnquiry({ onSubmit, onBack }) {
               )}
 
               <Field label="Estimated total attendance" hint="An approximate number is perfectly fine. Not everyone attending needs to receive a Beauty Call service.">
-                <TextInput type="number" min="1" max="10000" value={form.attendance} onChange={(e) => update("attendance", e.target.value)} />
+                <div className="events-attendance-counter">
+                  <button
+                    type="button"
+                    className="events-counter-button"
+                    aria-label="Decrease attendance"
+                    disabled={Number(form.attendance) <= 1}
+                    onClick={() => update("attendance", String(Math.max(1, (Number(form.attendance) || 1) - 1)))}
+                  >−</button>
+                  <input
+                    className="events-counter-value"
+                    type="number"
+                    min="1"
+                    max="10000"
+                    value={form.attendance}
+                    onChange={(e) => update("attendance", e.target.value === "" ? "" : String(Math.min(10000, Math.max(1, Number(e.target.value) || 1))))}
+                    aria-label="Estimated total attendance"
+                  />
+                  <button
+                    type="button"
+                    className="events-counter-button"
+                    aria-label="Increase attendance"
+                    disabled={Number(form.attendance) >= 10000}
+                    onClick={() => update("attendance", String(Math.min(10000, (Number(form.attendance) || 1) + 1)))}
+                  >+</button>
+                </div>
               </Field>
 
               <Field label="When is the event?">
