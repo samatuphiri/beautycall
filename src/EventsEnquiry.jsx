@@ -1,16 +1,6 @@
 import React, { useMemo, useState } from "react";
 import "./EventsEnquiry.css";
 
-const EVENT_TYPES = [
-  "Wedding",
-  "Birthday",
-  "Bridal Shower",
-  "Bachelor / Bachelorette Celebration",
-  "Private Celebration",
-  "Retreat",
-  "Other",
-];
-
 const SERVICE_GROUPS = [
   {
     title: "Massage experiences",
@@ -72,8 +62,6 @@ const STAGES = [
 ];
 
 const emptyForm = {
-  eventType: "",
-  otherEventType: "",
   attendance: "10",
   dateChoice: "undecided",
   eventDate: "",
@@ -165,9 +153,8 @@ export default function EventsEnquiry({ onSubmit, onBack }) {
   const canContinue = () => {
     if (stage === 0) {
       return Boolean(
-        form.eventType &&
-        (form.eventType !== "Other" || form.otherEventType.trim()) &&
-        Number(form.attendance) >= 1
+        Number(form.attendance) >= 9 &&
+        Number(form.attendance) <= 500
       );
     }
     if (stage === 1) {
@@ -263,46 +250,30 @@ export default function EventsEnquiry({ onSubmit, onBack }) {
               <h2>Tell us about your event</h2>
               <p className="events-intro">Start with the essentials. If some details are not confirmed yet, that's fine.</p>
 
-              <Field label="What are you celebrating?">
-                <div className="events-choice-grid">
-                  {EVENT_TYPES.map((type) => (
-                    <ChoiceCard key={type} checked={form.eventType === type} onChange={() => update("eventType", type)}>
-                      {type}
-                    </ChoiceCard>
-                  ))}
-                </div>
-              </Field>
-
-              {form.eventType === "Other" && (
-                <Field label="What type of event are you planning?">
-                  <TextInput value={form.otherEventType} onChange={(e) => update("otherEventType", e.target.value)} placeholder="Describe your event" />
-                </Field>
-              )}
-
               <Field label="Estimated total attendance" hint="An approximate number is perfectly fine. Not everyone attending needs to receive a Beauty Call service.">
                 <div className="events-attendance-counter">
                   <button
                     type="button"
                     className="events-counter-button"
                     aria-label="Decrease attendance"
-                    disabled={Number(form.attendance) <= 1}
-                    onClick={() => update("attendance", String(Math.max(1, (Number(form.attendance) || 1) - 1)))}
+                    disabled={Number(form.attendance) <= 9}
+                    onClick={() => update("attendance", String(Math.max(9, (Number(form.attendance) || 10) - 1)))}
                   >−</button>
                   <input
                     className="events-counter-value"
                     type="number"
-                    min="1"
-                    max="10000"
+                    min="9"
+                    max="500"
                     value={form.attendance}
-                    onChange={(e) => update("attendance", e.target.value === "" ? "" : String(Math.min(10000, Math.max(1, Number(e.target.value) || 1))))}
+                    onChange={(e) => update("attendance", e.target.value === "" ? "" : String(Math.min(500, Math.max(9, Number(e.target.value) || 9))))}
                     aria-label="Estimated total attendance"
                   />
                   <button
                     type="button"
                     className="events-counter-button"
                     aria-label="Increase attendance"
-                    disabled={Number(form.attendance) >= 10000}
-                    onClick={() => update("attendance", String(Math.min(10000, (Number(form.attendance) || 1) + 1)))}
+                    disabled={Number(form.attendance) >= 500}
+                    onClick={() => update("attendance", String(Math.min(500, (Number(form.attendance) || 10) + 1)))}
                   >+</button>
                 </div>
               </Field>
@@ -511,7 +482,6 @@ export default function EventsEnquiry({ onSubmit, onBack }) {
 
               <div className="events-review">
                 <h3>Enquiry overview</h3>
-                <p><strong>Event:</strong> {form.eventType === "Other" ? form.otherEventType : form.eventType || "Not selected"}</p>
                 <p><strong>Attendance:</strong> {form.attendance || "Not specified"}</p>
                 <p><strong>Venue:</strong> {[form.venueName, form.venueAddress].filter(Boolean).join(" · ") || "Not specified"}</p>
                 <p><strong>Experience:</strong> {form.planningPath === "plan" ? "Help me plan" : `${selectedServiceCount} service(s) selected`}</p>
