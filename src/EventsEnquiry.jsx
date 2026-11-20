@@ -1,6 +1,55 @@
 import React, { useMemo, useState } from "react";
 import "./EventsEnquiry.css";
 
+const EVENT_TYPES = [
+  "Wedding",
+  "Birthday",
+  "Bridal shower",
+  "Bachelor / Bachelorette celebration",
+  "Private celebration",
+  "Corporate event",
+  "Wellness retreat",
+  "Other",
+];
+
+const EXPERIENCE_TYPES = [
+  {
+    id: "relaxation",
+    title: "Relaxation and spa",
+    description: "Massages, foot treatments and relaxing spa experiences.",
+    services: ["Swedish massage", "Deep tissue massage", "Aromatherapy massage", "Hot stone massage", "Back, neck and shoulder massage", "Foot massage and reflexology", "Head and scalp massage", "Foot soaks", "Body exfoliation"],
+    extras: ["Mobile spa stations"],
+  },
+  {
+    id: "beauty",
+    title: "Beauty and pampering",
+    description: "Facials, nail care and pampering experiences.",
+    services: ["Express facials", "Luxury facials", "Manicures", "Pedicures", "Hand treatments", "Foot treatments", "Bridal pampering experiences"],
+    extras: ["Bridal pampering experiences"],
+  },
+  {
+    id: "wellness",
+    title: "Wellness experience",
+    description: "Wellness stations, chair massage and consultations.",
+    services: ["Express chair massage", "Wellness consultations", "Aromatherapy experiences"],
+    extras: ["Mobile spa stations", "Custom wellness packages"],
+  },
+  {
+    id: "couples",
+    title: "Couples experience",
+    description: "Treatments and moments designed for couples.",
+    services: ["Swedish massage", "Aromatherapy massage", "Hot stone massage", "Couples treatments"],
+    extras: ["Couples treatments"],
+  },
+  {
+    id: "custom",
+    title: "Custom experience",
+    description: "A tailored combination designed around your event.",
+    services: [],
+    extras: ["Custom wellness packages"],
+  },
+];
+
 const SERVICE_GROUPS = [
   {
     title: "Massage experiences",
@@ -37,22 +86,6 @@ const SERVICE_GROUPS = [
   },
 ];
 
-const EVENT_EXPERIENCES = [
-  "Mobile spa stations",
-  "Bridal pampering experiences",
-  "Couples treatments",
-  "Custom wellness packages",
-];
-
-const INSPIRATION = [
-  "Relaxing spa day",
-  "Bridal pamper experience",
-  "Luxury wellness lounge",
-  "Couples relaxation experience",
-  "Wellness retreat",
-  "Custom celebration experience",
-];
-
 const STAGES = [
   "Your event",
   "Design your experience",
@@ -63,16 +96,17 @@ const STAGES = [
 
 const emptyForm = {
   attendance: "10",
+  eventType: "",
+  otherEventType: "",
+  experienceTypes: [],
+  experienceAddons: [],
+  experienceDescription: "",
   dateChoice: "undecided",
   eventDate: "",
   venueName: "",
   venueAddress: "",
   venueConfirmed: "yes",
-  planningPath: "choose",
   services: {},
-  experiences: [],
-  planningInspirations: [],
-  planningDescription: "",
   startTime: "",
   endTime: "",
   treatmentSpace: "",
@@ -158,9 +192,11 @@ export default function EventsEnquiry({ onSubmit, onBack }) {
       );
     }
     if (stage === 1) {
-      return form.planningPath === "plan"
-        ? Boolean(form.planningInspirations.length || form.planningDescription.trim())
-        : selectedServiceCount > 0 || form.experiences.length > 0;
+      return Boolean(
+        form.eventType &&
+        (form.eventType !== "Other" || form.otherEventType.trim()) &&
+        (form.experienceTypes.length > 0 || form.experienceDescription.trim())
+      );
     }
     if (stage === 4) {
       return Boolean(form.fullName.trim() && form.phone.trim() && form.email.trim());
@@ -183,21 +219,21 @@ export default function EventsEnquiry({ onSubmit, onBack }) {
     setSubmitError("");
   };
 
-  const toggleExperience = (name) => {
+  const toggleExperienceType = (id) => {
     update(
-      "experiences",
-      form.experiences.includes(name)
-        ? form.experiences.filter((item) => item !== name)
-        : [...form.experiences, name]
+      "experienceTypes",
+      form.experienceTypes.includes(id)
+        ? form.experienceTypes.filter((item) => item !== id)
+        : [...form.experienceTypes, id]
     );
   };
 
-  const toggleInspiration = (name) => {
+  const toggleExperienceAddon = (name) => {
     update(
-      "planningInspirations",
-      form.planningInspirations.includes(name)
-        ? form.planningInspirations.filter((item) => item !== name)
-        : [...form.planningInspirations, name]
+      "experienceAddons",
+      form.experienceAddons.includes(name)
+        ? form.experienceAddons.filter((item) => item !== name)
+        : [...form.experienceAddons, name]
     );
   };
 
@@ -308,83 +344,113 @@ export default function EventsEnquiry({ onSubmit, onBack }) {
           {stage === 1 && (
             <div className="events-stage">
               <p className="events-step">02 / EXPERIENCE DESIGN</p>
-              <h2>How would you like us to help?</h2>
-              <p className="events-intro">Choose the services you have in mind, or tell us the kind of experience you'd like us to create.</p>
+              <h2>Let's shape your event experience</h2>
+              <p className="events-intro">First, tell us what you're celebrating. Then choose the kind of experience you'd like us to create.</p>
 
-              <div className="events-choice-grid events-choice-grid-two">
-                <ChoiceCard checked={form.planningPath === "choose"} onChange={() => update("planningPath", "choose")} description="Select services and experiences you already have in mind.">I know what I want</ChoiceCard>
-                <ChoiceCard checked={form.planningPath === "plan"} onChange={() => update("planningPath", "plan")} description="Share your ideas and let our team recommend an arrangement.">Help me plan</ChoiceCard>
-              </div>
+              <Field label="What kind of event are you planning?">
+                <div className="events-choice-grid events-choice-grid-two">
+                  {EVENT_TYPES.map((type) => (
+                    <ChoiceCard key={type} checked={form.eventType === type} onChange={() => update("eventType", type)}>
+                      {type}
+                    </ChoiceCard>
+                  ))}
+                </div>
+              </Field>
 
-              {form.planningPath === "choose" ? (
-                <>
-                  {SERVICE_GROUPS.map((group) => (
-                    <div className="events-service-group" key={group.title}>
-                      <h3>{group.title}</h3>
-                      <div className="events-service-list">
-                        {group.items.map((name) => {
-                          const item = form.services[name] || { selected: false, quantity: "10" };
-                          return (
-                            <div className={`events-service-row ${item.selected ? "is-selected" : ""}`} key={name}>
-                              <label className="events-check-label">
-                                <input type="checkbox" checked={item.selected} onChange={() => toggleService(name)} />
-                                <span>{name}</span>
-                              </label>
-                              {item.selected && (
-                                <label className="events-quantity">
-                                  <span>Guests</span>
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    max="10000"
-                                    value={item.quantity}
-                                    onChange={(e) => update("services", {
-                                      ...form.services,
-                                      [name]: { ...item, quantity: e.target.value },
-                                    })}
-                                    aria-label={`Number of guests for ${name}`}
-                                  />
-                                  <button type="button" onClick={() => update("services", {
-                                    ...form.services,
-                                    [name]: { ...item, quantity: "" },
-                                  })}>Undecided</button>
+              {form.eventType === "Other" && (
+                <Field label="What type of event is it?">
+                  <TextInput value={form.otherEventType} onChange={(e) => update("otherEventType", e.target.value)} placeholder="Describe your event" />
+                </Field>
+              )}
+
+              <Field label="What kind of experience would you like?" hint="Choose as many as you like. We'll show services relevant to your selections.">
+                <div className="events-choice-grid events-choice-grid-two">
+                  {EXPERIENCE_TYPES.map((experience) => (
+                    <ChoiceCard
+                      key={experience.id}
+                      checked={form.experienceTypes.includes(experience.id)}
+                      onChange={() => toggleExperienceType(experience.id)}
+                      description={experience.description}
+                    >
+                      {experience.title}
+                    </ChoiceCard>
+                  ))}
+                </div>
+              </Field>
+
+              {form.experienceTypes.length > 0 && (
+                <div className="events-service-group">
+                  <h3>Services to include</h3>
+                  <p className="events-hint">Select any services you'd like. You can leave the guest quantity undecided.</p>
+                  {SERVICE_GROUPS.map((group) => {
+                    const relevantItems = group.items.filter((name) =>
+                      form.experienceTypes.some((id) =>
+                        EXPERIENCE_TYPES.find((experience) => experience.id === id)?.services.includes(name)
+                      )
+                    );
+                    if (!relevantItems.length) return null;
+                    return (
+                      <div className="events-service-group" key={group.title}>
+                        <h3>{group.title}</h3>
+                        <div className="events-service-list">
+                          {relevantItems.map((name) => {
+                            const item = form.services[name] || { selected: false, quantity: "10" };
+                            return (
+                              <div className={`events-service-row ${item.selected ? "is-selected" : ""}`} key={name}>
+                                <label className="events-check-label">
+                                  <input type="checkbox" checked={item.selected} onChange={() => toggleService(name)} />
+                                  <span>{name}</span>
                                 </label>
-                              )}
-                            </div>
-                          );
-                        })}
+                                {item.selected && (
+                                  <label className="events-quantity">
+                                    <span>Guests</span>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      max="500"
+                                      value={item.quantity}
+                                      onChange={(e) => update("services", {
+                                        ...form.services,
+                                        [name]: { ...item, quantity: e.target.value },
+                                      })}
+                                      aria-label={`Number of guests for ${name}`}
+                                    />
+                                    <button type="button" onClick={() => update("services", {
+                                      ...form.services,
+                                      [name]: { ...item, quantity: "" },
+                                    })}>Undecided</button>
+                                  </label>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {Array.from(new Set(form.experienceTypes.flatMap((id) =>
+                    EXPERIENCE_TYPES.find((experience) => experience.id === id)?.extras || []
+                  ))).length > 0 && (
+                    <div className="events-service-group">
+                      <h3>Additional experiences</h3>
+                      <div className="events-choice-grid events-choice-grid-two">
+                        {Array.from(new Set(form.experienceTypes.flatMap((id) =>
+                          EXPERIENCE_TYPES.find((experience) => experience.id === id)?.extras || []
+                        ))).map((name) => (
+                          <ChoiceCard key={name} checked={form.experienceAddons.includes(name)} onChange={() => toggleExperienceAddon(name)}>
+                            {name}
+                          </ChoiceCard>
+                        ))}
                       </div>
                     </div>
-                  ))}
-
-                  <div className="events-service-group">
-                    <h3>Luxury event experiences</h3>
-                    <p className="events-hint">These are broader experiences rather than individual treatments, so no guest quantity is needed here.</p>
-                    <div className="events-choice-grid events-choice-grid-two">
-                      {EVENT_EXPERIENCES.map((name) => (
-                        <ChoiceCard key={name} checked={form.experiences.includes(name)} onChange={() => toggleExperience(name)}>
-                          {name}
-                        </ChoiceCard>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Field label="What kind of experience inspires you?" hint="Choose one or more examples, or describe something different below.">
-                    <div className="events-choice-grid events-choice-grid-two">
-                      {INSPIRATION.map((name) => (
-                        <ChoiceCard key={name} checked={form.planningInspirations.includes(name)} onChange={() => toggleInspiration(name)}>
-                          {name}
-                        </ChoiceCard>
-                      ))}
-                    </div>
-                  </Field>
-                  <Field label="Tell us what you have in mind" hint="You can include the atmosphere, services, theme or anything you would like us to consider.">
-                    <TextArea rows={6} value={form.planningDescription} onChange={(e) => update("planningDescription", e.target.value)} placeholder="Describe the experience you'd love us to create…" />
-                  </Field>
-                </>
+                  )}
+                </div>
               )}
+
+              <Field label="Anything else you'd like us to know?" hint="Optional. Describe your vision, atmosphere, theme or any special touches you'd like us to consider.">
+                <TextArea rows={5} value={form.experienceDescription} onChange={(e) => update("experienceDescription", e.target.value)} placeholder="Tell us about the experience you'd love us to create…" />
+              </Field>
             </div>
           )}
 
@@ -484,7 +550,9 @@ export default function EventsEnquiry({ onSubmit, onBack }) {
                 <h3>Enquiry overview</h3>
                 <p><strong>Attendance:</strong> {form.attendance || "Not specified"}</p>
                 <p><strong>Venue:</strong> {[form.venueName, form.venueAddress].filter(Boolean).join(" · ") || "Not specified"}</p>
-                <p><strong>Experience:</strong> {form.planningPath === "plan" ? "Help me plan" : `${selectedServiceCount} service(s) selected`}</p>
+                <p><strong>Event:</strong> {form.eventType === "Other" ? form.otherEventType : form.eventType || "Not selected"}</p>
+                <p><strong>Experience:</strong> {form.experienceTypes.map((id) => EXPERIENCE_TYPES.find((item) => item.id === id)?.title).filter(Boolean).join(", ") || "Not specified"}</p>
+                <p><strong>Services:</strong> {selectedServiceCount} selected</p>
                 <p><strong>Contact:</strong> {form.contactChannel === "whatsapp" ? "WhatsApp" : "Email"}</p>
               </div>
               <p className="events-hint">You'll be able to review the complete enquiry before it is sent. We will also save it to Beauty Call's enquiry records when the secure submission connection is added.</p>
