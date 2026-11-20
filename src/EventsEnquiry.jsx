@@ -389,30 +389,62 @@ export default function EventsEnquiry({ onSubmit, onBack }) {
                           {relevantItems.map((name) => {
                             const item = form.services[name] || { selected: false, quantity: "10" };
                             return (
-                              <div className={`events-service-row ${item.selected ? "is-selected" : ""}`} key={name}>
-                                <label className="events-check-label">
-                                  <input type="checkbox" checked={item.selected} onChange={() => toggleService(name)} />
-                                  <span>{name}</span>
-                                </label>
+                              <div className="events-service-option" key={name}>
+                                <ChoiceCard checked={item.selected} onChange={() => toggleService(name)}>
+                                  {name}
+                                </ChoiceCard>
                                 {item.selected && (
-                                  <label className="events-quantity">
-                                    <span>Guests</span>
-                                    <input
-                                      type="number"
-                                      min="1"
-                                      max="500"
-                                      value={item.quantity}
-                                      onChange={(e) => update("services", {
-                                        ...form.services,
-                                        [name]: { ...item, quantity: e.target.value },
-                                      })}
-                                      aria-label={`Number of guests for ${name}`}
-                                    />
-                                    <button type="button" onClick={() => update("services", {
-                                      ...form.services,
-                                      [name]: { ...item, quantity: "" },
-                                    })}>Undecided</button>
-                                  </label>
+                                  <div className="events-quantity">
+                                    <span className="events-quantity-label">Guests</span>
+                                    <div className="events-quantity-controls">
+                                      <div className="events-attendance-counter events-service-counter">
+                                        <button
+                                          type="button"
+                                          className="events-counter-button"
+                                          aria-label={`Decrease number of guests for ${name}`}
+                                          disabled={Number(item.quantity) <= 1}
+                                          onClick={() => update("services", {
+                                            ...form.services,
+                                            [name]: { ...item, quantity: String(Math.max(1, (Number(item.quantity) || 1) - 1)) },
+                                          })}
+                                        >−</button>
+                                        <input
+                                          className="events-counter-value"
+                                          type="number"
+                                          min="1"
+                                          max="500"
+                                          value={item.quantity}
+                                          onChange={(e) => update("services", {
+                                            ...form.services,
+                                            [name]: {
+                                              ...item,
+                                              quantity: e.target.value === "" ? "" : String(Math.min(500, Math.max(1, Number(e.target.value) || 1))),
+                                            },
+                                          })}
+                                          aria-label={`Number of guests for ${name}`}
+                                        />
+                                        <button
+                                          type="button"
+                                          className="events-counter-button"
+                                          aria-label={`Increase number of guests for ${name}`}
+                                          disabled={Number(item.quantity) >= 500}
+                                          onClick={() => update("services", {
+                                            ...form.services,
+                                            [name]: { ...item, quantity: String(Math.min(500, (Number(item.quantity) || 0) + 1)) },
+                                          })}
+                                        >+</button>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        className={`events-undecided ${item.quantity === "" ? "is-selected" : ""}`}
+                                        aria-pressed={item.quantity === ""}
+                                        onClick={() => update("services", {
+                                          ...form.services,
+                                          [name]: { ...item, quantity: item.quantity === "" ? "10" : "" },
+                                        })}
+                                      >Undecided</button>
+                                    </div>
+                                  </div>
                                 )}
                               </div>
                             );
